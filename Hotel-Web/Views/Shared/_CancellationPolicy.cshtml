@@ -1,0 +1,36 @@
+﻿@* Bảng chính sách hủy phòng — dùng chung ở trang Xác nhận đặt phòng, Thanh toán cọc, Hủy phòng *@
+@{
+    var highlight = ViewData["PolicyNights"] as int?;   // tô sáng dòng ứng với số đêm của booking
+    int Row(int n) => n <= 1 ? 1 : n <= 3 ? 2 : n <= 6 ? 3 : 4;
+    var hl = highlight.HasValue ? Row(highlight.Value) : 0;
+}
+<style>
+    .policy { margin-top: 34px; }
+    .policy h3 { font-size: 26px; font-weight: 500; }
+    .policy table { width: 100%; border-collapse: collapse; margin-top: 12px; background: #fff; font-size: 14px; }
+    .policy th { text-align: left; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); font-weight: 500; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+    .policy td { padding: 12px 14px; border-bottom: 1px solid var(--line); }
+    .policy tr.hl td { background: #fdf6ea; font-weight: 500; }
+    .policy ul { margin: 14px 0 0 18px; font-size: 14px; line-height: 1.9; color: #5c5046; }
+    .policy .times { display: flex; gap: 26px; flex-wrap: wrap; margin-top: 10px; font-size: 14px; color: #5c5046; }
+    .policy .times b { color: var(--ink); }
+</style>
+<div class="policy">
+    <div class="eyebrow">Quy định lưu trú</div>
+    <h3>Chính sách hủy phòng</h3>
+    <div class="times"><span>Nhận phòng từ <b>14:00</b></span><span>Trả phòng trước <b>12:00</b></span><span>Đặt cọc <b>30%</b> để xác nhận</span></div>
+    <table>
+        <tr><th>Số đêm đặt</th><th>Hủy miễn phí</th><th>Hủy trễ hạn</th><th>Hủy trong 24h trước nhận phòng</th></tr>
+        <tr class="@(hl == 1 ? "hl" : "")"><td>1 đêm</td><td>Trước 24 giờ</td><td>—</td><td>Giữ 100% cọc</td></tr>
+        <tr class="@(hl == 2 ? "hl" : "")"><td>2 – 3 đêm</td><td>Trước 3 ngày</td><td>Giữ 50% cọc</td><td>Giữ 100% cọc</td></tr>
+        <tr class="@(hl == 3 ? "hl" : "")"><td>4 – 6 đêm</td><td>Trước 5 ngày</td><td>Giữ 50% cọc</td><td>Giữ 100% cọc</td></tr>
+        <tr class="@(hl == 4 ? "hl" : "")"><td>Từ 7 đêm</td><td>Trước 7 ngày</td><td>Giữ 50% cọc</td><td>Giữ 100% cọc</td></tr>
+    </table>
+    <ul>
+        <li><b>Hủy đúng hạn:</b> hoàn 100% tiền cọc.</li>
+        <li><b>Hủy trễ hạn:</b> giữ 50% tiền cọc. <b>Hủy trong vòng 24 giờ trước nhận phòng:</b> giữ 100% tiền cọc.</li>
+        <li><b>Không đến nhận phòng (No-show):</b> giữ 100% tiền cọc.</li>
+        <li><b>Đặt sát ngày (dưới 24 giờ trước nhận phòng):</b> được hủy miễn phí trong 1 giờ sau khi đặt, miễn là chưa nhận phòng; quá 1 giờ giữ 100% tiền cọc.</li>
+        <li><b>Khách sạn hủy:</b> hoàn 100% tiền cọc và xử lý trách nhiệm phát sinh theo thỏa thuận, pháp luật.</li>
+    </ul>
+</div>

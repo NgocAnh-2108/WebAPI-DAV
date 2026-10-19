@@ -1,0 +1,75 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<ServiceDTO>
+@{
+    ViewData["Title"] = "Dịch vụ";
+    ViewData["TransparentHeader"] = true;
+    string? hero = ViewBag.HeroImage;
+    var groups = Model.GroupBy(s => s.Category).ToList();
+    var intros = new Dictionary<string, string> {
+        ["Ẩm thực"] = "Hương vị cao nguyên trong từng bữa ăn — phục vụ tại nhà hàng hoặc tận phòng.",
+        ["Spa & Thư giãn"] = "Liệu trình thư giãn giúp bạn tái tạo năng lượng sau một ngày khám phá.",
+        ["Giặt ủi"] = "Giặt sấy, ủi phẳng và trả trong ngày để hành lý luôn gọn gàng.",
+        ["Di chuyển"] = "Đưa đón sân bay Liên Khương và phương tiện khám phá Đà Lạt.",
+        ["Khác"] = "Những tiện ích nhỏ cho kỳ nghỉ trọn vẹn."
+    };
+}
+
+<section class="page-hero">
+    <div class="hero-bg" style="@(string.IsNullOrEmpty(hero) ? "" : $"background-image:url('{hero}')")"></div>
+    <div class="hero-inner">
+        <div class="eyebrow">Dịch vụ khách sạn</div>
+        <h1>Chăm chút từng khoảnh khắc</h1>
+        <p>Đặt kèm khi đặt phòng trực tuyến, hoặc yêu cầu tại quầy lễ tân bất cứ lúc nào trong thời gian lưu trú</p>
+    </div>
+</section>
+
+<div class="container svc-page">
+    @if (groups.Count > 1)
+    {
+        <div class="svc-nav reveal">
+            @foreach (var g in groups) { <a href="#cat-@groups.IndexOf(g)">@g.Key</a> }
+        </div>
+    }
+
+    @foreach (var g in groups)
+    {
+        var idx = groups.IndexOf(g);
+        <section class="svc-group reveal" id="cat-@idx">
+            <div class="gh">
+                <div class="idx">@((idx + 1).ToString("00"))</div>
+                <h2>@g.Key</h2>
+                <p>@(intros.TryGetValue(g.Key, out var t) ? t : "")</p>
+            </div>
+            <div class="svc-list">
+                @foreach (var s in g)
+                {
+                    <div class="item">
+                        <div><h3>@s.Name</h3><p>@s.Description</p></div>
+                        <div class="p">@s.Price.ToString("N0")₫<small>/ @s.Unit</small></div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+    @if (!Model.Any())
+    {
+        <div class="empty-state"><h3>Danh sách dịch vụ đang được cập nhật</h3><p>Vui lòng liên hệ lễ tân để biết thêm chi tiết.</p></div>
+    }
+
+    <div class="sec-head reveal" style="margin-top:80px">
+        <div class="eyebrow">Cách đặt dịch vụ</div>
+        <h2>Đơn giản trong 3 bước</h2>
+    </div>
+    <div class="svc-how reveal">
+        <div><b>01</b><h3>Chọn phòng &amp; ngày</h3><p>Tìm phòng còn trống cho khoảng thời gian lưu trú của bạn.</p></div>
+        <div><b>02</b><h3>Thêm dịch vụ</h3><p>Ở bước xác nhận, chọn số lượng dịch vụ muốn đặt kèm.</p></div>
+        <div><b>03</b><h3>Thanh toán khi trả phòng</h3><p>Chỉ đặt cọc tiền phòng; dịch vụ được cộng vào hóa đơn cuối.</p></div>
+    </div>
+</div>
+
+<section class="cta reveal">
+    <div class="eyebrow">Sẵn sàng cho kỳ nghỉ?</div>
+    <h2>Đặt phòng và chọn dịch vụ ngay hôm nay</h2>
+    <a class="btn-lux" href="/Rooms/List#book">Đặt phòng</a>
+</section>

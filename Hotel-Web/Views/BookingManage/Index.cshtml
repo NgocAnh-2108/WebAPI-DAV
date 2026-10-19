@@ -1,0 +1,120 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<BookingWithDetailDTO>
+@{
+    Layout = "_AdminLayout";
+    string? fs = ViewBag.FilterStatus;
+    bool isManager = ViewBag.IsManager == true;
+    var statuses = new[] { "Pending", "Confirmed", "CheckedIn", "CheckedOut", "Cancelled", "NoShow" };
+    int refundCount = ViewBag.RefundCount ?? 0;
+}
+<div class="card">
+    <div style="display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center">
+        <div class="tabs" style="margin:0">
+            <a class="@(string.IsNullOrEmpty(fs) ? "on" : "")" href="/BookingManage/Index">Tất cả</a>
+            @foreach (var s in statuses)
+            {
+                <a class="@(fs == s ? "on" : "")" href="/BookingManage/Index?status=@s">@RoleHelper.StatusLabel(s)</a>
+            }
+            <a class="@(fs == "Refund" ? "on" : "")" href="/BookingManage/Index?status=Refund">Chờ hoàn cọc (@refundCount)</a>
+        </div>
+        <div class="actions">
+            <form method="get" style="display:flex;gap:8px">
+                <input type="hidden" name="status" value="@fs" />
+                <input name="q" value="@ViewBag.Query" placeholder="Mã booking, tên, SĐT..." />
+                <button class="btn btn-dark">Tìm</button>
+            </form>
+            <a class="btn btn-gold" href="/BookingManage/NewBooking">+ Tạo booking</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Booking <small>@Model.Count kết quả</small></h3>
+    <table class="admin-table">
+        <tr><th>Mã</th><th>Khách hàng</th><th>Phòng</th><th>Lưu trú</th><th>Trạng thái</th><th>Cọc</th><th class="right">Tổng tiền</th><th>Thao tác</th></tr>
+        @foreach (var b in Model)
+        {
+            <tr>
+                <td class="code">@b.BookingCode</td>
+                <td><b>@b.CustomerName</b><div class="muted">@b.CustomerPhone</div></td>
+                <td>@string.Join(", ", b.RoomNumbers)</td>
+                <td>@b.CheckInDate.ToString("HH:mm dd/MM/yy")<br />→ @b.CheckOutDate.ToString("HH:mm dd/MM/yy")<div class="muted">@b.Nights đêm</div></td>
+                <td>
+                    <span class="pill pill-@b.Status">@RoleHelper.StatusLabel(b.Status)</span>
+                    @if (b.Status is "Cancelled" or "NoShow")
+                    {
+                        @if (!b.IsDepositPaid) { <div class="muted" style="margin-top:4px">Chưa cọc — không phát sinh hoàn</div> }
+                        else
+                        {
+                            <div class="muted" style="margin-top:4px">Hoàn khách: <b>@b.RefundAmount.ToString("N0") đ</b> · Giữ lại: <b>@b.CancellationFee.ToString("N0") đ</b></div>
+                        }
+                    }
+                    @if (b.RefundStatus == "Pending") { <div style="margin-top:4px"><a href="/FinanceManage/Refunds" class="pill pill-Pending" style="text-decoration:none">Chờ hoàn @b.RefundAmount.ToString("N0") đ →</a></div> }
+                    @if (b.RefundStatus == "Done") { <div style="margin-top:4px"><span class="pill pill-Success">Đã hoàn @b.RefundAmount.ToString("N0") đ</span></div> }
+                    @if (b.RoomChangeDiscount > 0) { <div class="muted">Giảm trừ đổi phòng @b.RoomChangeDiscount.ToString("N0") đ</div> }
+                </td>
+                <td>
+                    @if (b.IsDepositPaid) { <span class="pill pill-Success">@b.DepositAmount.ToString("N0") đ</span> }
+                    else { <span class="muted">@b.DepositAmount.ToString("N0") đ</span> }
+                </td>
+                <td class="right"><b>@b.TotalPrice.ToString("N0") đ</b></td>
+                <td>
+                    <div class="actions">
+                        @if (!b.IsDepositPaid && b.Status == "Pending")
+                        {
+                            <form asp-action="ConfirmDeposit" method="post" onsubmit="return confirm('Xác nhận đã nhận @b.DepositAmount.ToString("N0") đ tiền cọc (tiền mặt hoặc MoMo nội dung @b.BookingCode)?');">
+                                <input type="hidden" name="id" value="@b.Id" />
+                                <button class="btn btn-green">Thu cọc</button>
+                            </form>
+                        }
+                        @if (b.Status == "Confirmed")
+                        {
+                            <a class="btn btn-blue" href="/BookingManage/CheckIn?code=@b.BookingCode">Nhận phòng</a>
+                        }
+                        @if (b.Status == "CheckedIn")
+                        {
+                            <a class="btn btn-dark" href="/BookingManage/CheckOut">Trả phòng</a>
+                        }
+                        @if (b.Status == "CheckedIn" || b.Status == "Confirmed")
+                        {
+                            <a class="btn btn-outline" href="/ServiceManage/Usage?bookingId=@b.Id">+ Dịch vụ</a>
+                            <a class="btn btn-outline" href="/BookingManage/Transfer/@b.Id">Chuyển phòng</a>
+                        }
+                        @if (b.Status is "Pending" or "Confirmed" or "CheckedIn")
+                        {
+                            <a class="btn btn-outline" href="/BookingManage/ChangeTime/@b.Id">Đổi giờ</a>
+                        }
+                        @if ((b.Status is "Pending" or "Confirmed") && DateTime.Now >= b.CheckInDate)
+                        {
+                            <form asp-action="NoShow" method="post" onsubmit="return confirm('Khách không đến nhận phòng @b.BookingCode? Khách sạn giữ 100% tiền cọc.');">
+                                <input type="hidden" name="id" value="@b.Id" />
+                                <button class="btn btn-gray">Không đến</button>
+                            </form>
+                        }
+                        @if (b.RefundStatus == "Pending")
+                        {
+                            <a class="btn btn-green" href="/FinanceManage/Refunds">Hoàn cọc</a>
+                        }
+                        @if (b.Status == "CheckedOut" || b.Status == "CheckedIn")
+                        {
+                            <a class="btn btn-outline" href="/FinanceManage/InvoiceDetail/@b.Id">Hóa đơn</a>
+                        }
+                        @if (b.Status == "Pending" || b.Status == "Confirmed")
+                        {
+                            <a class="btn btn-gray" href="/BookingManage/Cancel/@b.Id">Hủy</a>
+                        }
+                        @if (isManager)
+                        {
+                            <form asp-action="DeleteBooking" method="post" onsubmit="return confirm('XÓA VĨNH VIỄN booking @b.BookingCode?');">
+                                <input type="hidden" name="id" value="@b.Id" />
+                                <button class="btn btn-danger">Xóa</button>
+                            </form>
+                        }
+                    </div>
+                </td>
+            </tr>
+        }
+    </table>
+    @if (!Model.Any()) { <p class="empty">Không có booking nào</p> }
+</div>

@@ -1,0 +1,54 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model CustomerDTO
+@{
+    Layout = "_AdminLayout";
+    var bookings = ViewBag.Bookings as List<BookingWithDetailDTO> ?? new();
+}
+<div class="grid-3">
+    <div class="card">
+        <h3>Lịch sử đặt phòng <small>@bookings.Count booking · chi tiêu @bookings.Where(b => b.Status == "CheckedOut").Sum(b => b.TotalPrice).ToString("N0") đ</small></h3>
+        <table class="admin-table">
+            <tr><th>Mã</th><th>Phòng</th><th>Lưu trú</th><th>Trạng thái</th><th class="right">Tổng tiền</th></tr>
+            @foreach (var b in bookings)
+            {
+                <tr>
+                    <td class="code">@b.BookingCode</td>
+                    <td>@string.Join(", ", b.RoomNumbers)</td>
+                    <td>@b.CheckInDate.ToString("dd/MM/yy") → @b.CheckOutDate.ToString("dd/MM/yy")</td>
+                    <td><span class="pill pill-@b.Status">@RoleHelper.StatusLabel(b.Status)</span></td>
+                    <td class="right">@b.TotalPrice.ToString("N0") đ</td>
+                </tr>
+            }
+        </table>
+        @if (!bookings.Any()) { <p class="empty">Khách chưa có booking nào</p> }
+    </div>
+    <div class="card">
+        <h3>Thông tin</h3>
+        <form asp-action="Edit" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <div style="display:grid;gap:12px">
+                <div><label>Họ tên</label><input name="FullName" value="@Model.FullName" minlength="3" required style="width:100%" /></div>
+                <div><label>Số điện thoại</label><input name="Phone" value="@Model.Phone" required style="width:100%" /></div>
+                <div><label>Email</label><input type="email" name="Email" value="@Model.Email" style="width:100%" /></div>
+                <div><label>CCCD</label><input name="IdentityCard" value="@Model.IdentityCard" style="width:100%" /></div>
+                <div><label>Địa chỉ</label><input name="Address" value="@Model.Address" style="width:100%" /></div>
+            </div>
+            <div class="actions" style="margin-top:16px">
+                <button class="btn btn-gold">Lưu</button>
+                <a class="btn btn-outline" href="/CustomerManage/Index">Quay lại</a>
+            </div>
+        </form>
+        @if (!bookings.Any())
+        {
+            <form asp-action="Delete" method="post" style="margin-top:12px" onsubmit="return confirm('Xóa khách hàng @Model.FullName?');">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button class="btn btn-danger">Xóa khách hàng</button>
+            </form>
+        }
+        else
+        {
+            <p class="muted" style="margin-top:12px;font-size:12px">Khách đã có booking nên không thể xóa (giữ lịch sử).</p>
+        }
+    </div>
+</div>

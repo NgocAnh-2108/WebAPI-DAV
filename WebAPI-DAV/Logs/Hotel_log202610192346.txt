@@ -1,0 +1,17 @@
+2026-10-19 23:46:57.271 +07:00 [INF] User profile is available. Using 'C:\Users\Admin\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-10-19 23:46:57.737 +07:00 [INF] Now listening on: https://localhost:7167
+2026-10-19 23:46:57.739 +07:00 [INF] Now listening on: http://localhost:5257
+2026-10-19 23:46:57.801 +07:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-10-19 23:46:57.806 +07:00 [INF] Hosting environment: Development
+2026-10-19 23:46:57.809 +07:00 [INF] Content root path: C:\Users\Admin\Downloads\WebAPI-DAV (3)\WebAPI-DAV
+2026-10-19 23:46:58.551 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7167/swagger/index.html - null null
+2026-10-19 23:46:58.877 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7167/swagger/index.html - 200 null text/html;charset=utf-8 331.6297ms
+2026-10-19 23:46:58.885 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7167/_framework/aspnetcore-browser-refresh.js - null null
+2026-10-19 23:46:58.888 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7167/_vs/browserLink - null null
+2026-10-19 23:46:58.895 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7167/_framework/aspnetcore-browser-refresh.js - 200 13756 application/javascript; charset=utf-8 10.2754ms
+2026-10-19 23:46:59.016 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7167/_vs/browserLink - 200 null text/javascript; charset=UTF-8 128.2213ms
+2026-10-19 23:46:59.023 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/RoomTypes/get-all-roomtypes - null null
+2026-10-19 23:46:59.064 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7167/swagger/v1/swagger.json - null null
+2026-10-19 23:46:59.242 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.RoomTypesController.GetAll (WebAPI-DAV)'
+2026-10-19 23:46:59.271 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7167/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 208.8444ms
+2026-10-19 23:46:59.338 +07:00 [INF] Route matched with {action = "GetAll", controller = "RoomTypes"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetAll() on controller WebAPI_DAV.Controllers.RoomTypesController (WebAPI-DAV).

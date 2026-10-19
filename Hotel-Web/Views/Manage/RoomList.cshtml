@@ -1,0 +1,109 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<ManageRoomDTO>
+@{
+    Layout = "_AdminLayout";
+    var roomTypes = ViewBag.RoomTypes as List<RoomTypeDTO> ?? new();
+    var occupied = ViewBag.OccupiedRooms as List<string> ?? new();
+}
+<style>
+    .no-img-sm { width: 64px; height: 46px; background: #f0e9dd; border-radius: 8px; display: grid; place-items: center; font-size: 10px; color: #a3907a; }
+    .file-btn input { display: none; }
+</style>
+
+<div class="card">
+    <h3>Thêm phòng mới</h3>
+    @if (!roomTypes.Any())
+    {
+        <p class="muted">Chưa có loại phòng. Hãy <a href="/Manage/RoomTypes">tạo loại phòng</a> trước.</p>
+    }
+    else
+    {
+        <form class="mg-form" asp-action="AddRoom" method="post">
+            <div class="field"><label>Số phòng</label><input type="text" name="RoomNumber" placeholder="VD: 101" required /></div>
+            <div class="field"><label>Tầng</label><input type="number" name="Floor" min="0" max="200" required /></div>
+            <div class="field grow">
+                <label>Loại phòng</label>
+                <select name="RoomTypeId" required>
+                    @foreach (var rt in roomTypes) { <option value="@rt.Id">@rt.Name — @rt.BasePrice.ToString("N0") đ</option> }
+                </select>
+            </div>
+            <div class="field">
+                <label>Trạng thái</label>
+                <select name="Status"><option value="Available">Sẵn sàng</option><option value="Maintenance">Bảo trì</option></select>
+            </div>
+            <button type="submit" class="btn btn-gold">+ Thêm phòng</button>
+        </form>
+    }
+</div>
+
+<div class="card">
+    <h3>
+        Danh sách phòng <small>@Model.Count phòng</small>
+        <form method="get" style="display:flex;gap:8px"><input name="q" value="@ViewBag.Query" placeholder="Tìm số phòng / loại..." /><button class="btn btn-dark">Tìm</button></form>
+    </h3>
+    <table class="admin-table">
+        <tr><th>Ảnh</th><th>Phòng</th><th>Loại</th><th>Tầng</th><th>Trạng thái</th><th>Giá/đêm</th><th>Thao tác</th></tr>
+        @foreach (var r in Model)
+        {
+            <tr>
+                <td>
+                    @if (!string.IsNullOrEmpty(r.ImageUrl)) { <img src="@r.ImageUrl" alt="" /> }
+                    else { <div class="no-img-sm">Chưa có ảnh</div> }
+                </td>
+                <td class="code">@r.RoomNumber</td>
+                <td>@r.RoomTypeName</td>
+                <td>@r.Floor</td>
+                <td><span class="pill pill-@r.Status">@RoleHelper.StatusLabel(r.Status)</span></td>
+                <td>@r.BasePrice.ToString("N0") đ</td>
+                <td>
+                    <div class="actions">
+                        <button type="button" class="btn btn-dark" onclick="toggleEdit('room-@r.Id')">Sửa</button>
+                        <form asp-action="UploadRoomImage" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="roomId" value="@r.Id" />
+                            <label class="btn btn-gray file-btn" style="margin:0;text-transform:none;letter-spacing:0;font-size:12.5px;color:#fff">
+                                Đổi ảnh<input type="file" name="imageFile" accept=".jpg,.jpeg,.png" onchange="this.form.submit()" />
+                            </label>
+                        </form>
+                        <form asp-action="DeleteRoom" method="post" onsubmit="return confirm('Xóa phòng @r.RoomNumber?');">
+                            <input type="hidden" name="id" value="@r.Id" />
+                            <button type="submit" class="btn btn-danger">Xóa</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr id="room-@r.Id" class="edit-row">
+                <td colspan="7">
+                    <form class="mg-form" asp-action="EditRoom" method="post">
+                        <input type="hidden" name="id" value="@r.Id" />
+                        <div class="field"><label>Số phòng</label><input type="text" name="RoomNumber" value="@r.RoomNumber" required /></div>
+                        <div class="field"><label>Tầng</label><input type="number" name="Floor" value="@r.Floor" required /></div>
+                        <div class="field grow">
+                            <label>Loại phòng</label>
+                            <select name="RoomTypeId" required>
+                                @foreach (var rt in roomTypes) { <option value="@rt.Id" selected="@(rt.Name == r.RoomTypeName)">@rt.Name</option> }
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Trạng thái</label>
+                            @if (occupied.Contains(r.RoomNumber))
+                            {
+                                <input type="hidden" name="Status" value="@r.Status" />
+                                <div class="muted" style="padding:9px 0">Đang có khách — không đổi được</div>
+                            }
+                            else
+                            {
+                                <select name="Status">
+                                    <option value="Available" selected="@(r.Status == "Available")">Sẵn sàng</option>
+                                    <option value="Maintenance" selected="@(r.Status == "Maintenance")">Bảo trì</option>
+                                </select>
+                            }
+                        </div>
+                        <button type="submit" class="btn btn-gold">Lưu thay đổi</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </table>
+    @if (!Model.Any()) { <p class="empty">Không có phòng nào</p> }
+</div>

@@ -1,0 +1,63 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model BookingWithDetailDTO
+@{
+    Layout = "_AdminLayout";
+    var nights = Math.Max(1, (Model.CheckOutDate.Date - Model.CheckInDate.Date).Days);
+    var paidDeposit = Model.IsDepositPaid ? Model.DepositAmount : 0;
+    var services = ViewBag.Services as List<BookingServiceDTO> ?? new();
+    var transfers = ViewBag.Transfers as List<RoomTransferDTO> ?? new();
+    var roomGross = Model.TotalPrice + Model.RoomChangeDiscount;   // tiền phòng trước giảm trừ
+    var svcTotal = services.Sum(s => s.Total);
+    var remaining = Model.TotalPrice + svcTotal - paidDeposit;
+    var perRoom = Model.RoomNumbers.Count > 0 ? roomGross / Model.RoomNumbers.Count : roomGross;
+}
+<style>
+    .invoice { max-width: 820px; margin: 0 auto; background: #fff; padding: 46px 52px; border-radius: 16px; box-shadow: 0 2px 14px rgba(43,36,32,.06); }
+    .inv-head { display: flex; justify-content: space-between; border-bottom: 2px solid var(--ink-2); padding-bottom: 18px; margin-bottom: 22px; }
+    .inv-head .brand { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 700; letter-spacing: 4px; color: var(--ink); }
+    .inv-head .brand small { display: block; font-family: Inter; font-size: 11px; letter-spacing: 3px; color: var(--gold); }
+    .inv-meta { text-align: right; font-size: 13px; color: var(--muted); }
+    .inv-meta b { color: var(--ink); font-size: 20px; font-family: 'Cormorant Garamond', serif; }
+    .inv-total td { font-size: 15px; }
+    .inv-total .grand td { font-size: 18px; font-weight: 700; border-top: 2px solid var(--ink-2); }
+    .thanks { text-align: center; margin-top: 30px; font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--gold); }
+    @@media print { .sidebar, .topbar, .no-print, .alert { display: none !important; } .main { margin: 0; padding: 0; } body { background: #fff; } .invoice { box-shadow: none; } }
+</style>
+<div class="actions no-print" style="justify-content:center;margin-bottom:18px">
+    <button class="btn btn-gold" onclick="window.print()">In hóa đơn</button>
+    <a class="btn btn-outline" href="/FinanceManage/Invoices">Danh sách hóa đơn</a>
+</div>
+<div class="invoice">
+    <div class="inv-head">
+        <div class="brand">DAV<small>HOTEL &amp; RESORT</small></div>
+        <div class="inv-meta">HÓA ĐƠN THANH TOÁN<br /><b>HD@(Model.Id.ToString("D5"))</b><br />Ngày: @DateTime.Now.ToString("dd/MM/yyyy")</div>
+    </div>
+    <div class="grid-2" style="margin-bottom:22px">
+        <div><label>Khách hàng</label><div><b>@Model.CustomerName</b></div><div class="muted">@Model.CustomerPhone</div></div>
+        <div><label>Mã booking</label><div class="code">@Model.BookingCode</div><div class="muted">@Model.CheckInDate.ToString("HH:mm dd/MM/yyyy") → @Model.CheckOutDate.ToString("HH:mm dd/MM/yyyy") · @nights đêm</div></div>
+    </div>
+    <table class="admin-table">
+        <tr><th>Mô tả</th><th>Số lượng</th><th class="right">Đơn giá</th><th class="right">Thành tiền</th></tr>
+        @foreach (var room in Model.RoomNumbers)
+        {
+            <tr><td>Tiền phòng @room</td><td>@nights đêm</td><td class="right">@((perRoom / nights).ToString("N0")) đ</td><td class="right">@perRoom.ToString("N0") đ</td></tr>
+        }
+        @foreach (var t in transfers.Where(t => t.DiscountAmount > 0))
+        {
+            <tr><td>Giảm trừ chuyển phòng @t.FromRoomNumber → @t.ToRoomNumber <span class="muted">(@t.CreatedDate.ToString("dd/MM"))</span></td><td>@t.RemainingNights đêm</td><td class="right">-@((t.OldPricePerNight - t.NewPricePerNight).ToString("N0")) đ</td><td class="right">-@t.DiscountAmount.ToString("N0") đ</td></tr>
+        }
+        @foreach (var s in services)
+        {
+            <tr><td>@s.ServiceName <span class="muted">(@s.UsedDate.ToString("dd/MM"))</span></td><td>@s.Quantity @s.Unit</td><td class="right">@s.UnitPrice.ToString("N0") đ</td><td class="right">@s.Total.ToString("N0") đ</td></tr>
+        }
+    </table>
+    <table class="admin-table inv-total" style="margin-top:14px;width:50%;margin-left:auto">
+        <tr><td>Tổng tiền phòng</td><td class="right">@roomGross.ToString("N0") đ</td></tr>
+        @if (Model.RoomChangeDiscount > 0) { <tr><td>Giảm trừ do chuyển phòng</td><td class="right">- @Model.RoomChangeDiscount.ToString("N0") đ</td></tr> }
+        <tr><td>Tổng dịch vụ</td><td class="right">@svcTotal.ToString("N0") đ</td></tr>
+        <tr><td>Đã đặt cọc</td><td class="right">- @paidDeposit.ToString("N0") đ</td></tr>
+        <tr class="grand"><td>@(Model.Status == "CheckedOut" ? "Đã thanh toán" : "Còn phải thu")</td><td class="right">@remaining.ToString("N0") đ</td></tr>
+    </table>
+    <div class="thanks">Cảm ơn quý khách đã lựa chọn DAV Hotel</div>
+</div>

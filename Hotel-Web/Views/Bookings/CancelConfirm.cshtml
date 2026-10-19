@@ -1,0 +1,79 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model BookingWithDetailDTO
+@{
+    ViewData["Title"] = "Hủy đặt phòng";
+    var q = (CancellationQuoteDTO)ViewBag.Quote;
+}
+<style>
+    .cc { max-width: 1000px; margin: 140px auto 0; display: grid; grid-template-columns: 1fr 1fr; background: #fff; box-shadow: 0 30px 70px rgba(23,19,15,.12); }
+    .cc .l { background: linear-gradient(160deg, #241d17, #3b2f24); color: #efe6d8; padding: 46px 42px; }
+    .cc .l h2 { color: #fff; font-size: 36px; font-weight: 500; margin: 8px 0 20px; }
+    .cc .l .row { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid #4a3d30; font-size: 15px; }
+    .cc .l .row span { color: #b3a48f; }
+    .cc .r { padding: 46px 42px; }
+    .cc .r h3 { font-size: 30px; font-weight: 500; }
+    .rule { background: #fbf3e6; color: #7a5212; padding: 14px 16px; margin: 18px 0; font-size: 14px; line-height: 1.6; }
+    .money-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed var(--line); font-size: 15px; }
+    .money-row b.big { font-family: var(--serif); font-size: 28px; }
+    .refund-acc { background: var(--sand); padding: 16px 18px 6px; margin-bottom: 14px; }
+    .refund-acc .fld { margin-bottom: 10px; }
+    .refund-acc label { display: block; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+    .refund-acc input, .refund-acc select { width: 100%; padding: 10px 12px; border: 1px solid var(--line); background: #fff; font-family: var(--sans); font-size: 14px; }
+    .cc-policy { max-width: 1000px; margin: 0 auto 80px; }
+    @@media (max-width: 860px) { .cc { grid-template-columns: 1fr; margin: 110px 16px 0; } .cc-policy { margin: 0 16px 60px; } }
+</style>
+
+<div class="cc reveal">
+    <div class="l">
+        <div class="eyebrow" style="color:var(--champagne)">Booking @Model.BookingCode</div>
+        <h2>Phòng @string.Join(" · ", Model.RoomNumbers)</h2>
+        <div class="row"><span>Nhận phòng</span><b>@Model.CheckInDate.ToString("HH:mm · dd/MM/yyyy")</b></div>
+        <div class="row"><span>Trả phòng</span><b>@Model.CheckOutDate.ToString("HH:mm · dd/MM/yyyy")</b></div>
+        <div class="row"><span>Số đêm</span><b>@Model.Nights đêm</b></div>
+        <div class="row"><span>Đặt lúc</span><b>@Model.CreatedDate.ToString("HH:mm · dd/MM/yyyy")</b></div>
+        <div class="row"><span>Tiền cọc</span><b>@Model.DepositAmount.ToString("N0")₫ @(Model.IsDepositPaid ? "(đã trả)" : "(chưa trả)")</b></div>
+    </div>
+    <div class="r">
+        <h3>Nếu hủy bây giờ</h3>
+        <div class="rule">@q.Rule</div>
+        @if (q.CanCancel)
+        {
+            <div class="money-row"><span>Tiền cọc đã trả</span><b>@q.DepositPaid.ToString("N0")₫</b></div>
+            <div class="money-row"><span>Khách sạn giữ lại (@q.FeePercent%)</span><b>@q.Fee.ToString("N0")₫</b></div>
+            <div class="money-row"><span>Hoàn lại cho bạn</span><b class="big" style="color:#3d7a55">@q.Refund.ToString("N0")₫</b></div>
+            @if (q.FreeCancelUntil.HasValue && q.FreeCancelUntil > DateTime.Now)
+            {
+                <p style="font-size:13px;color:var(--muted);margin-top:12px">Hủy miễn phí trước @q.FreeCancelUntil.Value.ToString("HH:mm dd/MM/yyyy").</p>
+            }
+            @if (q.Refund > 0)
+            {
+                <p style="font-size:13px;color:var(--muted);margin-top:8px">Tiền hoàn sẽ được khách sạn chuyển trả trong 3–7 ngày làm việc.</p>
+            }
+            <form asp-action="Cancel" method="post" style="margin-top:24px" onsubmit="return confirm('Xác nhận hủy booking @Model.BookingCode?');">
+                <input type="hidden" name="bookingId" value="@Model.Id" />
+                @if (q.Refund > 0)
+                {
+                    <div class="refund-acc">
+                        <div class="eyebrow" style="margin-bottom:8px">Tài khoản nhận tiền hoàn @q.Refund.ToString("N0")₫</div>
+                        <div class="fld"><label>Ngân hàng</label>
+                            <select name="bankCode" required>
+                                <option value="">-- Chọn ngân hàng --</option>
+                                @foreach (var bk in BankHelper.Banks) { <option value="@bk.Code">@bk.Name</option> }
+                            </select>
+                        </div>
+                        <div class="fld"><label>Số tài khoản</label><input name="accountNumber" required inputmode="numeric" pattern="\d{6,19}" maxlength="19" title="Chỉ nhập chữ số, từ 6 đến 19 số" oninput="this.value=this.value.replace(/\D/g,'')" /></div>
+                        <div class="fld"><label>Tên chủ tài khoản</label><input name="accountName" required placeholder="NGUYEN VAN A" style="text-transform:uppercase" pattern="[A-Za-zÀ-ỹĐđ ]{2,50}" maxlength="50" title="Chỉ nhập chữ cái và khoảng trắng" oninput="this.value=this.value.replace(/[^A-Za-zÀ-ỹĐđ ]/g,'')" /></div>
+                    </div>
+                }
+                <button class="btn-lux block" style="background:#a8443b;border-color:#a8443b">Xác nhận hủy đặt phòng</button>
+            </form>
+        }
+        <a class="btn-lux ghost block" style="margin-top:10px" href="/Bookings/MyBookings">Giữ đặt phòng</a>
+    </div>
+</div>
+
+<div class="cc-policy reveal">
+    @{ ViewData["PolicyNights"] = Model.Nights; }
+    <partial name="_CancellationPolicy" view-data="ViewData" />
+</div>

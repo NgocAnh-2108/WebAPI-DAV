@@ -1,0 +1,53 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<PaymentListDTO>
+@{
+    Layout = "_AdminLayout";
+    string? fs = ViewBag.FilterStatus;
+}
+<div class="stat-grid">
+    <div class="stat-box" style="--accent:#e4f4ea"><div class="label">Thực thu (đã trừ tiền hoàn cọc)</div><div class="value" style="font-size:30px">@(((decimal)ViewBag.TotalSuccess).ToString("N0")) đ</div><div class="hint">@ViewBag.CountSuccess giao dịch</div></div>
+    <div class="stat-box" style="--accent:#fcf0dc"><div class="label">Giao dịch đang chờ</div><div class="value">@ViewBag.CountPending</div><div class="hint">Khách chưa hoàn tất</div></div>
+</div>
+<div class="card">
+    <h3>
+        Lịch sử giao dịch
+        <span class="tabs" style="margin:0">
+            <a class="@(string.IsNullOrEmpty(fs) ? "on" : "")" href="?">Tất cả</a>
+            <a class="@(fs == "Success" ? "on" : "")" href="?status=Success">Thành công</a>
+            <a class="@(fs == "Pending" ? "on" : "")" href="?status=Pending">Đang chờ</a>
+            <a class="@(fs == "Failed" ? "on" : "")" href="?status=Failed">Thất bại</a>
+        </span>
+    </h3>
+    <table class="admin-table">
+        <tr><th>Mã giao dịch</th><th>Booking</th><th>Khách hàng</th><th>Hình thức</th><th>Thời gian</th><th>Trạng thái</th><th class="right">Số tiền</th></tr>
+        @foreach (var p in Model)
+        {
+            <tr>
+                <td class="code">@p.TransactionCode</td>
+                <td class="code">@p.BookingCode</td>
+                <td>@p.CustomerName</td>
+                <td>
+                    @if (p.Method == "VNPay" || (p.Method == null && !p.TransactionCode.StartsWith("CASH")))
+                    {
+                        <span>VNPay</span>
+                        @if (!string.IsNullOrEmpty(p.BankCode) || !string.IsNullOrEmpty(p.GatewayTransactionNo)) { <div class="muted">@p.BankCode @(p.GatewayTransactionNo != null ? "· GD " + p.GatewayTransactionNo : "")</div> }
+                    }
+                    else if (p.Method == "Refund")
+                    {
+                        <span style="color:var(--red)">Hoàn cọc cho khách</span>
+                    }
+                    else if (p.Method == "Bank")
+                    {
+                        <span>Chuyển khoản @p.BankCode (tự động)</span>
+                    }
+                    else { <span>Tại quầy (tiền mặt / MoMo)</span> }
+                </td>
+                <td>@((p.CompletedDate ?? p.CreatedDate).ToString("dd/MM/yyyy HH:mm"))</td>
+                <td><span class="pill pill-@p.Status">@RoleHelper.StatusLabel(p.Status)</span></td>
+                <td class="right"><b style="@(p.Amount < 0 ? "color:var(--red)" : "")">@p.Amount.ToString("N0") đ</b></td>
+            </tr>
+        }
+    </table>
+    @if (!Model.Any()) { <p class="empty">Chưa có giao dịch nào</p> }
+</div>

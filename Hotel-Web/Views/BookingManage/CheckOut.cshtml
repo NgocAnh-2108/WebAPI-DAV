@@ -1,0 +1,45 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<BookingWithDetailDTO>
+@{
+    Layout = "_AdminLayout";
+    var svcTotals = ViewBag.ServiceTotals as Dictionary<int, decimal> ?? new();
+}
+<div class="card">
+    <h3>Khách đang lưu trú <small>@Model.Count booking</small></h3>
+    <table class="admin-table">
+        <tr><th>Mã</th><th>Khách hàng</th><th>Phòng</th><th>Trả phòng dự kiến</th><th class="right">Tiền phòng</th><th class="right">Dịch vụ</th><th class="right">Đã cọc</th><th class="right">Còn phải thu</th><th></th></tr>
+        @foreach (var b in Model)
+        {
+            var paid = b.IsDepositPaid ? b.DepositAmount : 0;
+            var svc = svcTotals.TryGetValue(b.Id, out var sv) ? sv : 0;
+            var due = b.TotalPrice + svc - paid;
+            var overdue = b.CheckOutDate < DateTime.Now;
+            <tr>
+                <td class="code">@b.BookingCode</td>
+                <td><b>@b.CustomerName</b><div class="muted">@b.CustomerPhone</div></td>
+                <td>@string.Join(", ", b.RoomNumbers)</td>
+                <td>@b.CheckOutDate.ToString("HH:mm dd/MM/yyyy")
+                    @if (b.CheckOutDate.Date == DateTime.Today && !overdue) { <span class="pill pill-Pending">Hôm nay</span> }
+                    @if (overdue) { <span class="pill pill-Cancelled">Quá hạn</span> }
+                </td>
+                <td class="right">@b.TotalPrice.ToString("N0") đ
+                    @if (b.RoomChangeDiscount > 0) { <div class="muted">đã trừ @b.RoomChangeDiscount.ToString("N0") đ đổi phòng</div> }</td>
+                <td class="right"><a href="/ServiceManage/Usage?bookingId=@b.Id" title="Thêm / xem dịch vụ">@svc.ToString("N0") đ</a></td>
+                <td class="right">@paid.ToString("N0") đ</td>
+                <td class="right"><b style="color:var(--red)">@due.ToString("N0") đ</b></td>
+                <td>
+                    <div class="actions" style="margin-bottom:6px">
+                        <a class="btn btn-outline" href="/BookingManage/ChangeTime/@b.Id">Đổi giờ trả</a>
+                        <a class="btn btn-outline" href="/BookingManage/Transfer/@b.Id">Chuyển phòng</a>
+                    </div>
+                    <form asp-action="ConfirmCheckOut" method="post" onsubmit="return confirm('Đã thu đủ @due.ToString("N0") đ và xác nhận trả phòng?');">
+                        <input type="hidden" name="bookingId" value="@b.Id" />
+                        <button type="submit" class="btn btn-gold">Thanh toán &amp; trả phòng</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </table>
+    @if (!Model.Any()) { <p class="empty">Không có khách nào đang lưu trú</p> }
+</div>

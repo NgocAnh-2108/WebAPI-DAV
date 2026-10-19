@@ -1,0 +1,58 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model BookingWithDetailDTO
+@{
+    Layout = "_AdminLayout";
+    var guest = ViewBag.GuestQuote as CancellationQuoteDTO;
+    var hotel = ViewBag.HotelQuote as CancellationQuoteDTO;
+}
+<style>
+    .q-card { border: 2px solid var(--line); border-radius: 14px; padding: 20px 22px; background: #fff; }
+    .q-card h4 { margin: 0 0 6px; font-size: 17px; }
+    .q-card .rule { font-size: 13px; color: var(--muted); min-height: 38px; }
+    .q-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px dashed var(--line); font-size: 14px; }
+</style>
+
+<div class="card">
+    <h3>Booking <span class="code">@Model.BookingCode</span> <span class="pill pill-@Model.Status">@RoleHelper.StatusLabel(Model.Status)</span></h3>
+    <div class="grid-2">
+        <div>
+            <label>Khách hàng</label><div><b>@Model.CustomerName</b> · @Model.CustomerPhone</div>
+            <label style="margin-top:10px">Phòng</label><div>@string.Join(", ", Model.RoomNumbers)</div>
+        </div>
+        <div>
+            <label>Lưu trú</label><div>@Model.CheckInDate.ToString("HH:mm dd/MM/yyyy") → @Model.CheckOutDate.ToString("HH:mm dd/MM/yyyy") · @Model.Nights đêm</div>
+            <label style="margin-top:10px">Đặt lúc / Tiền cọc</label>
+            <div>@Model.CreatedDate.ToString("HH:mm dd/MM/yyyy") · @Model.DepositAmount.ToString("N0") đ @(Model.IsDepositPaid ? "(đã cọc)" : "(chưa cọc)")</div>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2">
+    @foreach (var (q, byHotel, title, btn) in new[] {
+        (guest, false, "Khách yêu cầu hủy", "btn-dark"),
+        (hotel, true, "Khách sạn hủy (sự cố, hết phòng...)", "btn-danger") })
+    {
+        if (q == null) { continue; }
+        <div class="card">
+            <div class="q-card">
+                <h4>@title</h4>
+                <div class="rule">@q.Rule</div>
+                <div class="q-row"><span>Tiền cọc đã nhận</span><b>@q.DepositPaid.ToString("N0") đ</b></div>
+                <div class="q-row"><span>Khách sạn giữ lại (@q.FeePercent%)</span><b>@q.Fee.ToString("N0") đ</b></div>
+                <div class="q-row"><span>Phải hoàn cho khách</span><b style="color:var(--green, #2f7a4f)">@q.Refund.ToString("N0") đ</b></div>
+                @if (q.CanCancel)
+                {
+                    <form asp-action="CancelBooking" method="post" style="margin-top:16px" onsubmit="return confirm('Xác nhận hủy booking @Model.BookingCode?');">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <input type="hidden" name="byHotel" value="@(byHotel ? "true" : "false")" />
+                        <div class="field"><label>Lý do</label><input name="reason" style="width:100%" placeholder="@(byHotel ? "VD: phòng hỏng điều hòa, không còn phòng thay thế" : "VD: khách đổi lịch công tác")" /></div>
+                        <button class="btn @btn" style="margin-top:10px">Hủy booking</button>
+                    </form>
+                }
+            </div>
+        </div>
+    }
+</div>
+<p class="muted">Tiền hoàn được ghi nhận ở tab <b>Chờ hoàn cọc</b>; quản lý chuyển khoản trả khách xong bấm <b>Đã hoàn tiền</b>.</p>
+<a class="btn btn-outline" href="/BookingManage/Index">← Quay lại danh sách</a>

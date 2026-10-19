@@ -1,0 +1,54 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model RegisterDTO
+@{
+    ViewData["Title"] = "Đăng ký hội viên";
+}
+<style>
+    .auth { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; }
+    .auth .art { background: linear-gradient(160deg, #1c1712 0%, #3b2f24 60%, #5b4732 100%); color: #fff; display: flex; flex-direction: column; justify-content: center; padding: 140px 70px 70px; position: relative; overflow: hidden; }
+    .auth .art::before { content: 'DAV'; position: absolute; right: -40px; bottom: -60px; font-family: var(--serif); font-size: 300px; color: rgba(217,185,138,.07); font-weight: 700; letter-spacing: 10px; }
+    .auth .art h2 { font-size: 54px; font-weight: 500; line-height: 1.05; margin-top: 16px; animation: rise 1s ease both; }
+    .auth .art h2 em { color: var(--champagne); }
+    .auth .art ul { list-style: none; margin-top: 30px; }
+    .auth .art li { padding: 12px 0; border-bottom: 1px solid #4a3d30; color: #d6cab8; font-weight: 300; }
+    .auth .form { display: flex; align-items: center; justify-content: center; padding: 140px 40px 70px; }
+    .auth .box { width: 100%; max-width: 460px; animation: rise 1s ease .15s both; }
+    .auth .box h1 { font-size: 44px; font-weight: 500; }
+    .auth .box form { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 30px; }
+    .auth .box form .full { grid-column: span 2; }
+    .auth .err { background: #f8e9e7; color: #8f3a32; padding: 12px 16px; font-size: 14px; margin-top: 20px; }
+    .auth .alt { margin-top: 24px; font-size: 14px; color: var(--muted); text-align: center; }
+    .auth .alt a { color: var(--gold); }
+    @@keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+    @@media (max-width: 900px) { .auth { grid-template-columns: 1fr; } .auth .art { display: none; } }
+</style>
+<div class="auth">
+    <div class="art">
+        <div class="eyebrow" style="color:var(--champagne)">Hội viên DAV</div>
+        <h2>Bắt đầu hành trình<br /><em>đẳng cấp</em></h2>
+        <ul>
+            <li>Đặt phòng trực tuyến, xác nhận tức thì</li>
+            <li>Thanh toán cọc an toàn chỉ 30%</li>
+            <li>Nhận phòng nhanh bằng mã booking</li>
+            <li>Theo dõi và quản lý mọi kỳ nghỉ</li>
+        </ul>
+    </div>
+    <div class="form">
+        <div class="box">
+            <div class="eyebrow">Tạo tài khoản</div>
+            <h1>Đăng ký hội viên</h1>
+            @if (ViewBag.Error != null) { <div class="err">@ViewBag.Error</div> }
+            <form asp-action="Register" method="post">
+                <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+                <div class="fld full"><label>Họ và tên</label><input type="text" name="FullName" value="@Model?.FullName" minlength="3" required /></div>
+                <div class="fld"><label>Email</label><input type="email" name="Username" value="@Model?.Username" required /></div>
+                <div class="fld"><label>Số điện thoại</label><input type="tel" name="Phone" value="@Model?.Phone" required /></div>
+                <div class="fld full"><label>Mật khẩu (tối thiểu 6 ký tự)</label><input type="password" name="Password" minlength="6" required /></div>
+                <input type="hidden" name="Roles[0]" value="Customer" />
+                <button type="submit" class="btn-lux block full">Tạo tài khoản</button>
+            </form>
+            <div class="alt">Đã là hội viên? <a href="/Account/Login?returnUrl=@Uri.EscapeDataString((string?)ViewBag.ReturnUrl ?? "")">Đăng nhập</a></div>
+        </div>
+    </div>
+</div>

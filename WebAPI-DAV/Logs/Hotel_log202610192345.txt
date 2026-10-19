@@ -1,0 +1,248 @@
+2026-10-19 23:45:54.351 +07:00 [WRN] No store type was specified for the decimal property 'DepositAmount' on entity type 'Booking'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-10-19 23:45:54.388 +07:00 [WRN] No store type was specified for the decimal property 'TotalPrice' on entity type 'Booking'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-10-19 23:45:54.388 +07:00 [WRN] No store type was specified for the decimal property 'Amount' on entity type 'Payment'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-10-19 23:45:54.388 +07:00 [WRN] No store type was specified for the decimal property 'BasePrice' on entity type 'RoomType'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-10-19 23:45:54.939 +07:00 [WRN] No store type was specified for the decimal property 'DepositAmount' on entity type 'Booking'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-10-19 23:45:54.940 +07:00 [WRN] No store type was specified for the decimal property 'TotalPrice' on entity type 'Booking'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-10-19 23:45:54.940 +07:00 [WRN] No store type was specified for the decimal property 'Amount' on entity type 'Payment'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-10-19 23:45:54.940 +07:00 [WRN] No store type was specified for the decimal property 'BasePrice' on entity type 'RoomType'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2026-10-19 23:45:55.587 +07:00 [INF] Executed DbCommand (591ms) [Parameters=[], CommandType='"Text"', CommandTimeout='60']
+CREATE DATABASE [HotelDB];
+2026-10-19 23:45:55.685 +07:00 [INF] Executed DbCommand (93ms) [Parameters=[], CommandType='"Text"', CommandTimeout='60']
+IF SERVERPROPERTY('EngineEdition') <> 5
+BEGIN
+    ALTER DATABASE [HotelDB] SET READ_COMMITTED_SNAPSHOT ON;
+END;
+2026-10-19 23:45:55.715 +07:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-19 23:45:55.823 +07:00 [INF] Executed DbCommand (15ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [__EFMigrationsHistory] (
+    [MigrationId] nvarchar(150) NOT NULL,
+    [ProductVersion] nvarchar(32) NOT NULL,
+    CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY ([MigrationId])
+);
+2026-10-19 23:45:55.838 +07:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-10-19 23:45:55.873 +07:00 [INF] Executed DbCommand (15ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-10-19 23:45:55.918 +07:00 [INF] Executed DbCommand (26ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2026-10-19 23:45:55.977 +07:00 [INF] Applying migration '20261005112031_InitialHotelMigration'.
+2026-10-19 23:45:56.088 +07:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Customers] (
+    [Id] int NOT NULL IDENTITY,
+    [FullName] nvarchar(max) NOT NULL,
+    [Phone] nvarchar(max) NOT NULL,
+    [Email] nvarchar(max) NULL,
+    [IdentityCard] nvarchar(max) NULL,
+    [Address] nvarchar(max) NULL,
+    CONSTRAINT [PK_Customers] PRIMARY KEY ([Id])
+);
+2026-10-19 23:45:56.091 +07:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [RoomTypes] (
+    [Id] int NOT NULL IDENTITY,
+    [Name] nvarchar(max) NOT NULL,
+    [Description] nvarchar(max) NULL,
+    [BasePrice] decimal(18,2) NOT NULL,
+    [MaxOccupancy] int NOT NULL,
+    CONSTRAINT [PK_RoomTypes] PRIMARY KEY ([Id])
+);
+2026-10-19 23:45:56.096 +07:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Bookings] (
+    [Id] int NOT NULL IDENTITY,
+    [CheckInDate] datetime2 NOT NULL,
+    [CheckOutDate] datetime2 NOT NULL,
+    [Status] nvarchar(max) NOT NULL,
+    [TotalPrice] decimal(18,2) NOT NULL,
+    [CreatedDate] datetime2 NOT NULL,
+    [Note] nvarchar(max) NULL,
+    [CustomerID] int NOT NULL,
+    CONSTRAINT [PK_Bookings] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_Bookings_Customers_CustomerID] FOREIGN KEY ([CustomerID]) REFERENCES [Customers] ([Id]) ON DELETE CASCADE
+);
+2026-10-19 23:45:56.100 +07:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Rooms] (
+    [Id] int NOT NULL IDENTITY,
+    [RoomNumber] nvarchar(max) NOT NULL,
+    [Status] nvarchar(max) NOT NULL,
+    [ImageUrl] nvarchar(max) NULL,
+    [Floor] int NOT NULL,
+    [RoomTypeId] int NOT NULL,
+    CONSTRAINT [PK_Rooms] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_Rooms_RoomTypes_RoomTypeId] FOREIGN KEY ([RoomTypeId]) REFERENCES [RoomTypes] ([Id]) ON DELETE CASCADE
+);
+2026-10-19 23:45:56.104 +07:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [BookingRooms] (
+    [Id] int NOT NULL IDENTITY,
+    [BookingId] int NOT NULL,
+    [RoomId] int NOT NULL,
+    CONSTRAINT [PK_BookingRooms] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_BookingRooms_Bookings_BookingId] FOREIGN KEY ([BookingId]) REFERENCES [Bookings] ([Id]) ON DELETE CASCADE,
+    CONSTRAINT [FK_BookingRooms_Rooms_RoomId] FOREIGN KEY ([RoomId]) REFERENCES [Rooms] ([Id]) ON DELETE CASCADE
+);
+2026-10-19 23:45:56.128 +07:00 [INF] Executed DbCommand (16ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_BookingRooms_BookingId] ON [BookingRooms] ([BookingId]);
+2026-10-19 23:45:56.143 +07:00 [INF] Executed DbCommand (15ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_BookingRooms_RoomId] ON [BookingRooms] ([RoomId]);
+2026-10-19 23:45:56.153 +07:00 [INF] Executed DbCommand (9ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_Bookings_CustomerID] ON [Bookings] ([CustomerID]);
+2026-10-19 23:45:56.164 +07:00 [INF] Executed DbCommand (11ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_Rooms_RoomTypeId] ON [Rooms] ([RoomTypeId]);
+2026-10-19 23:45:56.210 +07:00 [INF] Executed DbCommand (45ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20261005112031_InitialHotelMigration', N'8.0.31');
+2026-10-19 23:45:56.230 +07:00 [INF] Applying migration '20261005124915_AddImageTable'.
+2026-10-19 23:45:56.333 +07:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Images] (
+    [Id] int NOT NULL IDENTITY,
+    [FileName] nvarchar(max) NOT NULL,
+    [FileDescription] nvarchar(max) NULL,
+    [FileExtension] nvarchar(max) NOT NULL,
+    [FileSizeInBytes] bigint NOT NULL,
+    [FilePath] nvarchar(max) NOT NULL,
+    [RoomId] int NOT NULL,
+    CONSTRAINT [PK_Images] PRIMARY KEY ([Id])
+);
+2026-10-19 23:45:56.335 +07:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20261005124915_AddImageTable', N'8.0.31');
+2026-10-19 23:45:56.428 +07:00 [INF] Applying migration '20261005132956_AddCustomerBookingFields'.
+2026-10-19 23:45:56.454 +07:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Customers] ADD [UserId] nvarchar(max) NULL;
+2026-10-19 23:45:56.459 +07:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Bookings] ADD [BookingCode] nvarchar(max) NOT NULL DEFAULT N'';
+2026-10-19 23:45:56.462 +07:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Bookings] ADD [DepositAmount] decimal(18,2) NOT NULL DEFAULT 0.0;
+2026-10-19 23:45:56.464 +07:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20261005132956_AddCustomerBookingFields', N'8.0.31');
+2026-10-19 23:45:56.466 +07:00 [INF] Applying migration '20261009021910_AddPaymentTable'.
+2026-10-19 23:45:56.492 +07:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Bookings] ADD [IsDepositPaid] bit NOT NULL DEFAULT CAST(0 AS bit);
+2026-10-19 23:45:56.500 +07:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Payments] (
+    [Id] int NOT NULL IDENTITY,
+    [TransactionCode] nvarchar(max) NOT NULL,
+    [BookingId] int NOT NULL,
+    [Amount] decimal(18,2) NOT NULL,
+    [Status] nvarchar(max) NOT NULL,
+    [CreatedDate] datetime2 NOT NULL,
+    [CompletedDate] datetime2 NULL,
+    CONSTRAINT [PK_Payments] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_Payments_Bookings_BookingId] FOREIGN KEY ([BookingId]) REFERENCES [Bookings] ([Id]) ON DELETE CASCADE
+);
+2026-10-19 23:45:56.502 +07:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_Payments_BookingId] ON [Payments] ([BookingId]);
+2026-10-19 23:45:56.505 +07:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20261009021910_AddPaymentTable', N'8.0.31');
+2026-10-19 23:45:56.627 +07:00 [INF] Applying migration '20261013024448_AddServiceTables'.
+2026-10-19 23:45:56.727 +07:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Services] (
+    [Id] int NOT NULL IDENTITY,
+    [Name] nvarchar(max) NOT NULL,
+    [Description] nvarchar(max) NULL,
+    [Category] nvarchar(max) NOT NULL,
+    [Price] decimal(18,2) NOT NULL,
+    [Unit] nvarchar(max) NOT NULL,
+    [IsActive] bit NOT NULL,
+    CONSTRAINT [PK_Services] PRIMARY KEY ([Id])
+);
+2026-10-19 23:45:56.738 +07:00 [INF] Executed DbCommand (11ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [BookingServices] (
+    [Id] int NOT NULL IDENTITY,
+    [BookingId] int NOT NULL,
+    [ServiceId] int NOT NULL,
+    [Quantity] int NOT NULL,
+    [UnitPrice] decimal(18,2) NOT NULL,
+    [UsedDate] datetime2 NOT NULL,
+    [Note] nvarchar(max) NULL,
+    CONSTRAINT [PK_BookingServices] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_BookingServices_Bookings_BookingId] FOREIGN KEY ([BookingId]) REFERENCES [Bookings] ([Id]) ON DELETE CASCADE,
+    CONSTRAINT [FK_BookingServices_Services_ServiceId] FOREIGN KEY ([ServiceId]) REFERENCES [Services] ([Id]) ON DELETE NO ACTION
+);
+2026-10-19 23:45:56.877 +07:00 [INF] Executed DbCommand (139ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Category', N'Description', N'IsActive', N'Name', N'Price', N'Unit') AND [object_id] = OBJECT_ID(N'[Services]'))
+    SET IDENTITY_INSERT [Services] ON;
+INSERT INTO [Services] ([Id], [Category], [Description], [IsActive], [Name], [Price], [Unit])
+VALUES (1, N'Ẩm thực', N'Buffet Á - Âu tại nhà hàng tầng 1, 6:00 - 10:00', CAST(1 AS bit), N'Buffet sáng', 250000.0, N'suất'),
+(2, N'Ẩm thực', N'Thực đơn set menu phục vụ tận phòng', CAST(1 AS bit), N'Ăn tối tại phòng', 450000.0, N'suất'),
+(3, N'Spa & Thư giãn', N'Liệu trình 60 phút với tinh dầu thiên nhiên', CAST(1 AS bit), N'Massage toàn thân', 600000.0, N'lần'),
+(4, N'Giặt ủi', N'Giặt sấy và ủi, trả trong ngày', CAST(1 AS bit), N'Giặt ủi', 50000.0, N'kg'),
+(5, N'Di chuyển', N'Xe 4-7 chỗ đưa đón sân bay Liên Khương', CAST(1 AS bit), N'Đưa đón sân bay', 300000.0, N'chuyến'),
+(6, N'Di chuyển', N'Xe tay ga, kèm 2 mũ bảo hiểm', CAST(1 AS bit), N'Thuê xe máy', 150000.0, N'ngày'),
+(7, N'Ẩm thực', N'Nước uống và đồ ăn nhẹ trong phòng', CAST(1 AS bit), N'Minibar', 30000.0, N'món');
+IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Category', N'Description', N'IsActive', N'Name', N'Price', N'Unit') AND [object_id] = OBJECT_ID(N'[Services]'))
+    SET IDENTITY_INSERT [Services] OFF;
+2026-10-19 23:45:56.881 +07:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_BookingServices_BookingId] ON [BookingServices] ([BookingId]);
+2026-10-19 23:45:56.883 +07:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_BookingServices_ServiceId] ON [BookingServices] ([ServiceId]);
+2026-10-19 23:45:56.890 +07:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20261013024448_AddServiceTables', N'8.0.31');
+2026-10-19 23:45:56.992 +07:00 [INF] Applying migration '20261017163711_HotelPolicyTransfer'.
+2026-10-19 23:45:57.041 +07:00 [INF] Executed DbCommand (9ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Payments] ADD [BankCode] nvarchar(max) NULL;
+2026-10-19 23:45:57.045 +07:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Payments] ADD [GatewayTransactionNo] nvarchar(max) NULL;
+2026-10-19 23:45:57.048 +07:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Payments] ADD [Method] nvarchar(max) NULL;
+2026-10-19 23:45:57.053 +07:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Bookings] ADD [CancelReason] nvarchar(max) NULL;
+2026-10-19 23:45:57.058 +07:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Bookings] ADD [CancellationFee] decimal(18,2) NOT NULL DEFAULT 0.0;
+2026-10-19 23:45:57.060 +07:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Bookings] ADD [CancelledDate] datetime2 NULL;
+2026-10-19 23:45:57.063 +07:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Bookings] ADD [RefundAmount] decimal(18,2) NOT NULL DEFAULT 0.0;
+2026-10-19 23:45:57.067 +07:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Bookings] ADD [RefundStatus] nvarchar(max) NULL;
+2026-10-19 23:45:57.070 +07:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Bookings] ADD [RoomChangeDiscount] decimal(18,2) NOT NULL DEFAULT 0.0;
+2026-10-19 23:45:57.080 +07:00 [INF] Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [RoomTransfers] (
+    [Id] int NOT NULL IDENTITY,
+    [BookingId] int NOT NULL,
+    [FromRoomId] int NOT NULL,
+    [ToRoomId] int NOT NULL,
+    [OldPricePerNight] decimal(18,2) NOT NULL,
+    [NewPricePerNight] decimal(18,2) NOT NULL,
+    [RemainingNights] int NOT NULL,
+    [DiscountAmount] decimal(18,2) NOT NULL,
+    [Reason] nvarchar(max) NULL,
+    [CreatedDate] datetime2 NOT NULL,
+    CONSTRAINT [PK_RoomTransfers] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_RoomTransfers_Bookings_BookingId] FOREIGN KEY ([BookingId]) REFERENCES [Bookings] ([Id]) ON DELETE CASCADE,
+    CONSTRAINT [FK_RoomTransfers_Rooms_FromRoomId] FOREIGN KEY ([FromRoomId]) REFERENCES [Rooms] ([Id]) ON DELETE NO ACTION,
+    CONSTRAINT [FK_RoomTransfers_Rooms_ToRoomId] FOREIGN KEY ([ToRoomId]) REFERENCES [Rooms] ([Id]) ON DELETE NO ACTION
+);
+2026-10-19 23:45:57.089 +07:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_RoomTransfers_BookingId] ON [RoomTransfers] ([BookingId]);
+2026-10-19 23:45:57.092 +07:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_RoomTransfers_FromRoomId] ON [RoomTransfers] ([FromRoomId]);
+2026-10-19 23:45:57.094 +07:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_RoomTransfers_ToRoomId] ON [RoomTransfers] ([ToRoomId]);
+2026-10-19 23:45:57.110 +07:00 [INF] Executed DbCommand (16ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20261017163711_HotelPolicyTransfer', N'8.0.31');
+2026-10-19 23:45:57.112 +07:00 [INF] Applying migration '20261018103857_AddRefundInfo'.
+2026-10-19 23:45:57.137 +07:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Bookings] ADD [RefundAccountName] nvarchar(max) NULL;
+2026-10-19 23:45:57.139 +07:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Bookings] ADD [RefundAccountNumber] nvarchar(max) NULL;
+2026-10-19 23:45:57.141 +07:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Bookings] ADD [RefundBankCode] nvarchar(max) NULL;
+2026-10-19 23:45:57.144 +07:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Bookings] ADD [RefundNote] nvarchar(max) NULL;
+2026-10-19 23:45:57.211 +07:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE [Bookings] ADD [RefundedDate] datetime2 NULL;
+2026-10-19 23:45:57.227 +07:00 [INF] Executed DbCommand (16ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20261018103857_AddRefundInfo', N'8.0.31');
+2026-10-19 23:45:57.307 +07:00 [INF] Applying migration '20261019164205_UpdateHotelDatabase'.
+2026-10-19 23:45:57.374 +07:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20261019164205_UpdateHotelDatabase', N'8.0.31');

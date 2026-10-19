@@ -1,0 +1,37 @@
+﻿@using Hotel_Web.Models.DTO
+@model PaymentResultDTO
+@{
+    ViewData["Title"] = Model.Success ? "Thanh toán thành công" : "Thanh toán chưa thành công";
+}
+<style>
+    .pr { max-width: 620px; margin: 150px auto 90px; background: #fff; box-shadow: 0 30px 70px rgba(23,19,15,.12); text-align: center; padding: 54px 50px 46px; }
+    .pr .ic { width: 78px; height: 78px; border-radius: 50%; margin: 0 auto 20px; display: grid; place-items: center; font-size: 38px; color: #fff; }
+    .pr .ic.ok { background: #3d7a55; } .pr .ic.fail { background: #a8443b; }
+    .pr h1 { font-size: 40px; font-weight: 500; }
+    .pr p { color: #6f6255; margin: 10px 0 0; }
+    .pr .rows { margin: 28px 0 30px; text-align: left; font-size: 15px; }
+    .pr .rows div { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px dashed var(--line); }
+    .pr .rows span { color: var(--muted); }
+    .pr .acts { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+</style>
+<div class="pr reveal">
+    <div class="ic @(Model.Success ? "ok" : "fail")">@(Model.Success ? "✓" : "!")</div>
+    <div class="eyebrow">VNPay</div>
+    <h1>@(Model.Success ? "Đặt cọc thành công" : "Thanh toán chưa thành công")</h1>
+    <p>@Model.Message</p>
+
+    <div class="rows">
+        @if (!string.IsNullOrEmpty(Model.BookingCode)) { <div><span>Mã booking</span><b style="font-family:'Courier New'">@Model.BookingCode</b></div> }
+        @if (Model.Amount > 0) { <div><span>Số tiền</span><b>@Model.Amount.ToString("N0")₫</b></div> }
+        @if (!string.IsNullOrEmpty(Model.TransactionCode)) { <div><span>Mã giao dịch</span><b style="font-family:'Courier New'">@Model.TransactionCode</b></div> }
+        <div><span>Trạng thái booking</span><b style="color:@(Model.Success ? "#3d7a55" : "#a8443b")">@(Model.Success ? "Đã xác nhận" : "Chờ thanh toán cọc")</b></div>
+    </div>
+
+    <div class="acts">
+        <a class="btn-lux gold" href="/Bookings/MyBookings">Xem kỳ nghỉ của tôi</a>
+        @if (!Model.Success && Model.BookingId > 0)
+        {
+            <a class="btn-lux ghost" href="/Bookings/Pay/@Model.BookingId">Thử thanh toán lại</a>
+        }
+    </div>
+</div>

@@ -1,0 +1,89 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<BookingServiceDTO>
+@{
+    Layout = "_AdminLayout";
+    var bookings = ViewBag.ActiveBookings as List<BookingWithDetailDTO> ?? new();
+    var services = ViewBag.Services as List<ServiceDTO> ?? new();
+    int? selBooking = ViewBag.BookingId;
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+<div class="stat-grid">
+    <div class="stat-box" style="--accent:#f3e6cf"><div class="label">Doanh thu dịch vụ (đang lọc)</div><div class="value" style="font-size:30px">@Model.Sum(u => u.Total).ToString("N0") đ</div><div class="hint">@Model.Count lượt sử dụng</div></div>
+    <div class="stat-box" style="--accent:#e2eef7"><div class="label">Khách có thể ghi dịch vụ</div><div class="value">@bookings.Count</div><div class="hint">Đã xác nhận / đang lưu trú</div></div>
+</div>
+
+<div class="card">
+    <h3>Ghi nhận dịch vụ cho khách</h3>
+    @if (!bookings.Any())
+    {
+        <p class="muted">Hiện không có booking nào đang lưu trú hoặc đã xác nhận.</p>
+    }
+    else
+    {
+        <form class="mg-form" asp-action="AddUsage" method="post">
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
+            <div class="field grow">
+                <label>Booking / Khách</label>
+                <select name="BookingId" required>
+                    @foreach (var b in bookings)
+                    {
+                        <option value="@b.Id" selected="@(selBooking == b.Id)">@b.BookingCode — @b.CustomerName — P.@string.Join(",", b.RoomNumbers) (@RoleHelper.StatusLabel(b.Status))</option>
+                    }
+                </select>
+            </div>
+            <div class="field grow">
+                <label>Dịch vụ</label>
+                <select name="ServiceId" required>
+                    @foreach (var g in services.GroupBy(s => s.Category))
+                    {
+                        <optgroup label="@g.Key">
+                            @foreach (var s in g) { <option value="@s.Id">@s.Name — @s.Price.ToString("N0") đ/@s.Unit</option> }
+                        </optgroup>
+                    }
+                </select>
+            </div>
+            <div class="field" style="min-width:90px"><label>Số lượng</label><input type="number" name="Quantity" value="1" min="1" max="1000" required /></div>
+            <div class="field grow"><label>Ghi chú</label><input name="Note" placeholder="VD: phục vụ lúc 19h" /></div>
+            <button class="btn btn-gold">+ Ghi nhận</button>
+        </form>
+    }
+</div>
+
+<div class="card">
+    <h3>
+        Lịch sử sử dụng dịch vụ
+        <form method="get" class="mg-form" style="gap:8px">
+            <select name="bookingId" onchange="this.form.submit()">
+                <option value="">-- Tất cả booking --</option>
+                @foreach (var b in bookings) { <option value="@b.Id" selected="@(selBooking == b.Id)">@b.BookingCode — @b.CustomerName</option> }
+            </select>
+            <input type="date" name="from" value="@ViewBag.From" title="Từ ngày" />
+            <input type="date" name="to" value="@ViewBag.To" title="Đến ngày" />
+            <button class="btn btn-dark">Lọc</button>
+        </form>
+    </h3>
+    <table class="admin-table">
+        <tr><th>Thời gian</th><th>Booking</th><th>Khách / Phòng</th><th>Dịch vụ</th><th>SL</th><th class="right">Đơn giá</th><th class="right">Thành tiền</th><th></th></tr>
+        @foreach (var u in Model)
+        {
+            <tr>
+                <td>@u.UsedDate.ToString("dd/MM HH:mm")</td>
+                <td class="code">@u.BookingCode</td>
+                <td>@u.CustomerName<div class="muted">Phòng @string.Join(", ", u.RoomNumbers)</div></td>
+                <td><b>@u.ServiceName</b><div class="muted">@u.Category@(string.IsNullOrEmpty(u.Note) ? "" : " · " + u.Note)</div></td>
+                <td>@u.Quantity @u.Unit</td>
+                <td class="right">@u.UnitPrice.ToString("N0") đ</td>
+                <td class="right"><b>@u.Total.ToString("N0") đ</b></td>
+                <td>
+                    <form asp-action="DeleteUsage" method="post" onsubmit="return confirm('Xóa dịch vụ @u.ServiceName khỏi booking @u.BookingCode?');">
+                        <input type="hidden" name="id" value="@u.Id" />
+                        <input type="hidden" name="returnUrl" value="@returnUrl" />
+                        <button class="btn btn-outline">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </table>
+    @if (!Model.Any()) { <p class="empty">Chưa có dịch vụ nào được ghi nhận</p> }
+</div>

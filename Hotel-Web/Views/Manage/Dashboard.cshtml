@@ -1,0 +1,136 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model DashboardVM
+@{
+    Layout = "_AdminLayout";
+    bool isManager = ViewBag.IsManager == true;
+    var maxRev = Model.RevenueByMonth.Count > 0 ? Math.Max(1, Model.RevenueByMonth.Max(x => x.Total)) : 1;
+}
+<style>
+    .occ { display: flex; align-items: center; gap: 22px; }
+    .ring { --p: @Model.OccupancyPercent; width: 130px; height: 130px; border-radius: 50%; flex-shrink: 0;
+            background: conic-gradient(var(--gold) calc(var(--p) * 1%), #f0e9dd 0); display: grid; place-items: center; }
+    .ring div { width: 100px; height: 100px; border-radius: 50%; background: #fff; display: grid; place-items: center; font-family: 'Cormorant Garamond'; font-size: 32px; font-weight: 700; }
+    .legend div { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 13px; }
+    .legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+    .bars { display: flex; align-items: flex-end; gap: 14px; height: 170px; padding-top: 10px; }
+    .bar { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+    .bar .b { width: 100%; max-width: 46px; background: linear-gradient(180deg, var(--gold-2), var(--gold)); border-radius: 8px 8px 3px 3px;
+              animation: grow .9s ease both; transform-origin: bottom; min-height: 3px; }
+    .bar span { font-size: 11px; color: var(--muted); margin-top: 6px; }
+    .bar em { font-size: 10px; color: var(--ink-2); font-style: normal; margin-bottom: 4px; font-weight: 600; }
+    @@keyframes grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    .quick { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+    .quick a { background: var(--ink-2); color: var(--gold-2); text-decoration: none; padding: 16px; border-radius: 12px; font-weight: 600; text-align: center; transition: .2s; }
+    .quick a:hover { background: var(--gold); color: var(--ink); transform: translateY(-2px); }
+</style>
+
+@if ((int)(ViewBag.RefundPendingCount ?? 0) > 0)
+{
+    <div class="alert alert-danger" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <span>Có <b>@ViewBag.RefundPendingCount</b> khoản cần hoàn cọc cho khách, tổng <b>@(((decimal)ViewBag.RefundPendingTotal).ToString("N0")) đ</b></span>
+        <a class="btn btn-dark" href="/FinanceManage/Refunds">Xử lý hoàn cọc</a>
+    </div>
+}
+<div class="stat-grid">
+    <div class="stat-box" style="--accent:#e4f4ea"><div class="label">Phòng trống hôm nay</div><div class="value" style="color:var(--green)">@Model.AvailableRooms<span class="muted" style="font-size:20px">/@Model.TotalRooms</span></div><div class="hint">Sẵn sàng đón khách</div></div>
+    <div class="stat-box" style="--accent:#e2eef7"><div class="label">Đang có khách</div><div class="value" style="color:var(--blue)">@Model.OccupiedRooms</div><div class="hint">Đã check-in</div></div>
+    <div class="stat-box" style="--accent:#fcf0dc"><div class="label">Khách đến hôm nay</div><div class="value" style="color:var(--amber)">@Model.ArrivalsToday</div><div class="hint">Chờ nhận phòng</div></div>
+    <div class="stat-box"><div class="label">Khách đi hôm nay</div><div class="value">@Model.DeparturesToday</div><div class="hint">Cần trả phòng</div></div>
+    <div class="stat-box" style="--accent:#fcf0dc"><div class="label">Booking chờ cọc</div><div class="value">@Model.PendingBookings</div><div class="hint">Trạng thái Pending</div></div>
+    <div class="stat-box"><div class="label">Khách hàng</div><div class="value">@Model.TotalCustomers</div><div class="hint">Hồ sơ trong hệ thống</div></div>
+    @if (isManager)
+    {
+        <div class="stat-box" style="--accent:#f3e6cf"><div class="label">Doanh thu tháng này</div><div class="value" style="font-size:28px">@Model.RevenueThisMonth.ToString("N0") đ</div><div class="hint">Tổng: @Model.RevenueTotal.ToString("N0") đ</div></div>
+    }
+</div>
+
+<div class="card">
+    <h3>Thao tác nhanh</h3>
+    <div class="quick">
+        <a href="/BookingManage/CheckIn">Nhận phòng</a>
+        <a href="/BookingManage/CheckOut">Trả phòng</a>
+        <a href="/BookingManage/NewBooking">Tạo booking tại quầy</a>
+        <a href="/Manage/RoomMap">Sơ đồ phòng</a>
+        @if (isManager) { <a href="/Manage/RoomList">Thêm / sửa phòng</a> }
+    </div>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <h3>Công suất phòng hôm nay</h3>
+        <div class="occ">
+            <div class="ring"><div>@Model.OccupancyPercent%</div></div>
+            <div class="legend">
+                <div><i style="background:var(--green)"></i> Trống: <b>@Model.AvailableRooms</b></div>
+                <div><i style="background:var(--blue)"></i> Có khách: <b>@Model.OccupiedRooms</b></div>
+                <div><i style="background:var(--amber)"></i> Đặt trước: <b>@Model.ReservedRooms</b></div>
+                <div><i style="background:var(--gray)"></i> Bảo trì: <b>@Model.MaintenanceRooms</b></div>
+            </div>
+        </div>
+    </div>
+    @if (isManager)
+    {
+        <div class="card">
+            <h3>Doanh thu 6 tháng gần nhất <small>đã cọc + đã trả phòng</small></h3>
+            <div class="bars">
+                @foreach (var m in Model.RevenueByMonth)
+                {
+                    var h = (int)(m.Total * 100 / maxRev);
+                    <div class="bar">
+                        <em>@(m.Total >= 1000000 ? (m.Total / 1000000).ToString("0.#") + "tr" : (m.Total / 1000).ToString("N0") + "k")</em>
+                        <div class="b" style="height:@(h)%"></div>
+                        <span>@m.Label</span>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <h3>Khách cần trả phòng</h3>
+            @if (!Model.TodayDepartures.Any()) { <p class="empty">Không có khách cần trả phòng hôm nay</p> }
+            <table class="admin-table">
+                @foreach (var b in Model.TodayDepartures)
+                {
+                    <tr><td class="code">@b.BookingCode</td><td>@b.CustomerName</td><td>@string.Join(", ", b.RoomNumbers)</td>
+                        <td class="right"><a class="btn btn-dark" href="/BookingManage/CheckOut">Trả phòng</a></td></tr>
+                }
+            </table>
+        </div>
+    }
+</div>
+
+<div class="grid-3">
+    <div class="card">
+        <h3>Booking mới nhất <a class="btn btn-outline" href="/BookingManage/Index">Xem tất cả</a></h3>
+        <table class="admin-table">
+            <tr><th>Mã</th><th>Khách hàng</th><th>Phòng</th><th>Lưu trú</th><th>Trạng thái</th><th class="right">Tổng tiền</th></tr>
+            @foreach (var b in Model.RecentBookings)
+            {
+                <tr>
+                    <td class="code">@b.BookingCode</td>
+                    <td>@b.CustomerName</td>
+                    <td>@string.Join(", ", b.RoomNumbers)</td>
+                    <td>@b.CheckInDate.ToString("dd/MM") → @b.CheckOutDate.ToString("dd/MM")</td>
+                    <td><span class="pill pill-@b.Status">@RoleHelper.StatusLabel(b.Status)</span></td>
+                    <td class="right">@b.TotalPrice.ToString("N0") đ</td>
+                </tr>
+            }
+        </table>
+        @if (!Model.RecentBookings.Any()) { <p class="empty">Chưa có booking nào</p> }
+    </div>
+    <div class="card">
+        <h3>Khách đến hôm nay</h3>
+        @if (!Model.TodayArrivals.Any()) { <p class="empty">Không có khách đến hôm nay</p> }
+        @foreach (var b in Model.TodayArrivals)
+        {
+            <div style="padding:10px 0;border-bottom:1px solid var(--line)">
+                <div style="display:flex;justify-content:space-between"><b>@b.CustomerName</b><span class="pill pill-@b.Status">@RoleHelper.StatusLabel(b.Status)</span></div>
+                <div class="muted" style="margin-top:4px">Phòng @string.Join(", ", b.RoomNumbers) · <span class="code">@b.BookingCode</span></div>
+                <a class="btn btn-gold" style="margin-top:8px" href="/BookingManage/CheckIn?code=@b.BookingCode">Nhận phòng</a>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,69 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@{
+    Layout = "_AdminLayout";
+    var booking = ViewBag.Booking as BookingWithDetailDTO;
+    var arrivals = ViewBag.Arrivals as List<BookingWithDetailDTO> ?? new();
+}
+<div class="grid-3">
+    <div>
+        <div class="card">
+            <h3>Tra cứu mã booking</h3>
+            <form class="mg-form" method="get">
+                <div class="field grow"><label>Mã booking khách cung cấp</label><input type="text" name="code" value="@ViewBag.Code" placeholder="VD: BK-A1B2C3D4" style="font-size:16px;text-transform:uppercase" required autofocus /></div>
+                <button type="submit" class="btn btn-dark" style="padding:11px 22px">Tra cứu</button>
+            </form>
+            @if (ViewBag.LookupError != null) { <div class="alert alert-danger" style="margin-top:14px">@ViewBag.LookupError</div> }
+        </div>
+
+        @if (booking != null)
+        {
+            var canCheckIn = booking.Status == "Confirmed" && booking.IsDepositPaid;
+            <div class="card" style="border-top:4px solid var(--gold)">
+                <h3>Booking <span class="code">@booking.BookingCode</span> <span class="pill pill-@booking.Status">@RoleHelper.StatusLabel(booking.Status)</span></h3>
+                <table class="admin-table">
+                    <tr><td class="muted">Khách hàng</td><td><b>@booking.CustomerName</b> — @booking.CustomerPhone</td></tr>
+                    <tr><td class="muted">Phòng</td><td><b>@string.Join(", ", booking.RoomNumbers)</b></td></tr>
+                    <tr><td class="muted">Lưu trú</td><td>@booking.CheckInDate.ToString("dd/MM/yyyy") → @booking.CheckOutDate.ToString("dd/MM/yyyy") (@((booking.CheckOutDate.Date - booking.CheckInDate.Date).Days) đêm)</td></tr>
+                    <tr><td class="muted">Tổng tiền</td><td>@booking.TotalPrice.ToString("N0") đ</td></tr>
+                    <tr><td class="muted">Tiền cọc</td><td>@booking.DepositAmount.ToString("N0") đ — @(booking.IsDepositPaid ? "Đã thanh toán" : "CHƯA thanh toán")</td></tr>
+                    @if (!string.IsNullOrEmpty(booking.Note)) { <tr><td class="muted">Ghi chú</td><td>@booking.Note</td></tr> }
+                </table>
+                <div class="actions" style="margin-top:16px">
+                    @if (canCheckIn)
+                    {
+                        <form asp-action="ConfirmCheckIn" method="post">
+                            <input type="hidden" name="bookingCode" value="@booking.BookingCode" />
+                            <button type="submit" class="btn btn-gold" style="padding:12px 24px;font-size:14px">Xác nhận nhận phòng</button>
+                        </form>
+                    }
+                    else if (!booking.IsDepositPaid && booking.Status == "Pending")
+                    {
+                        <form asp-action="ConfirmDeposit" method="post">
+                            <input type="hidden" name="id" value="@booking.Id" />
+                            <input type="hidden" name="returnUrl" value="/BookingManage/CheckIn?code=@booking.BookingCode" />
+                            <button type="submit" class="btn btn-green">Thu cọc @booking.DepositAmount.ToString("N0") đ tại quầy</button>
+                        </form>
+                        <span class="muted">Khách cần thanh toán cọc trước khi nhận phòng</span>
+                    }
+                    else
+                    {
+                        <span style="color:var(--red)">Không thể nhận phòng ở trạng thái "@RoleHelper.StatusLabel(booking.Status)"</span>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="card">
+        <h3>Khách đến hôm nay <small>@arrivals.Count</small></h3>
+        @if (!arrivals.Any()) { <p class="empty">Không có khách chờ nhận phòng</p> }
+        @foreach (var b in arrivals)
+        {
+            <a href="?code=@b.BookingCode" style="display:block;text-decoration:none;padding:12px 0;border-bottom:1px solid var(--line)">
+                <div style="display:flex;justify-content:space-between"><b>@b.CustomerName</b><span class="pill pill-@b.Status">@RoleHelper.StatusLabel(b.Status)</span></div>
+                <div class="muted" style="margin-top:3px"><span class="code">@b.BookingCode</span> · Phòng @string.Join(", ", b.RoomNumbers)</div>
+            </a>
+        }
+    </div>
+</div>

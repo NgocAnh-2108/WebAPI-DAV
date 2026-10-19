@@ -1,0 +1,30 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<BookingWithDetailDTO>
+@{
+    Layout = "_AdminLayout";
+    var svcTotals = ViewBag.ServiceTotals as Dictionary<int, decimal> ?? new();
+}
+<div class="card">
+    <h3>
+        Hóa đơn <small>Booking đang ở / đã trả phòng</small>
+        <form method="get" style="display:flex;gap:8px"><input name="q" value="@ViewBag.Query" placeholder="Mã booking, tên khách..." /><button class="btn btn-dark">Tìm</button></form>
+    </h3>
+    <table class="admin-table">
+        <tr><th>Số HĐ</th><th>Mã booking</th><th>Khách hàng</th><th>Phòng</th><th>Ngày trả</th><th>Trạng thái</th><th class="right">Tổng tiền</th><th></th></tr>
+        @foreach (var b in Model)
+        {
+            <tr>
+                <td class="code">HD@(b.Id.ToString("D5"))</td>
+                <td class="code">@b.BookingCode</td>
+                <td>@b.CustomerName</td>
+                <td>@string.Join(", ", b.RoomNumbers)</td>
+                <td>@b.CheckOutDate.ToString("dd/MM/yyyy")</td>
+                <td><span class="pill pill-@b.Status">@(b.Status == "CheckedOut" ? "Đã thanh toán" : "Chưa quyết toán")</span></td>
+                <td class="right"><b>@((b.TotalPrice + (svcTotals.TryGetValue(b.Id, out var sv) ? sv : 0)).ToString("N0")) đ</b></td>
+                <td><a class="btn btn-outline" href="/FinanceManage/InvoiceDetail/@b.Id">Xem / In</a></td>
+            </tr>
+        }
+    </table>
+    @if (!Model.Any()) { <p class="empty">Chưa có hóa đơn nào</p> }
+</div>

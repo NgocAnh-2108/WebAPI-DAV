@@ -1,0 +1,124 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model BookingWithDetailDTO
+@{
+    ViewData["Title"] = "Thanh toán đặt cọc";
+
+    
+    const string MomoQrImage = "/images/momo-qr.png.jpg";   
+    const string MomoName = "DAV HOTEL";               
+    const string MomoPhone = "0705332527";
+    var bank = ViewBag.Bank as BankTransferInfoDTO;           
+              
+}
+<style>
+    .pay { max-width: 1040px; margin: 140px auto 0; display: grid; grid-template-columns: 1fr 1.05fr; background: #fff; box-shadow: 0 30px 70px rgba(23,19,15,.12); }
+    .pay .left { background: linear-gradient(160deg, #241d17, #3b2f24); color: #efe6d8; padding: 50px 44px; }
+    .pay .left h2 { font-size: 40px; font-weight: 500; color: #fff; margin: 10px 0 26px; }
+    .pay .left .row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #4a3d30; font-size: 15px; }
+    .pay .left .row span { color: #b3a48f; }
+    .pay .left .total { font-family: var(--serif); font-size: 44px; color: var(--champagne); margin-top: 6px; }
+    .pay .right { padding: 44px; text-align: center; }
+    .pay .right h3 { font-size: 30px; font-weight: 500; }
+    .qr-box { margin: 22px auto 0; width: 260px; padding: 14px; border: 1px solid var(--line); background: #fff; position: relative; }
+    .qr-box::before { content: 'MoMo'; position: absolute; top: -11px; left: 50%; transform: translateX(-50%); background: #a50064; color: #fff; font-size: 11px; letter-spacing: 2px; padding: 2px 12px; }
+    .qr-box img { width: 100%; display: block; }
+    .qr-missing { padding: 40px 10px; font-size: 13px; color: #a8443b; display: none; }
+    .info { margin: 22px auto 0; max-width: 360px; text-align: left; font-size: 14px; }
+    .info div { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed var(--line); gap: 10px; }
+    .info span { color: var(--muted); }
+    .info b.big { font-family: var(--serif); font-size: 22px; color: #a50064; }
+    .copy { border: 1px solid var(--line); background: #fff; font-size: 11px; padding: 4px 10px; cursor: pointer; letter-spacing: 1px; font-family: var(--sans); }
+    .copy:hover { border-color: var(--gold); color: var(--gold); }
+    .steps { text-align: left; max-width: 360px; margin: 20px auto 0; font-size: 13px; color: #6f6255; line-height: 1.8; padding-left: 18px; }
+    .warn { background: #fbf3e6; color: #8a5a12; font-size: 13px; padding: 12px; margin: 18px auto 0; max-width: 360px; }
+    .vnpay { border: 1px solid var(--line); padding: 22px 22px 18px; text-align: left; background: #fbfaf7; }
+    .vnpay .tag { display: inline-block; background: #005baa; color: #fff; font-size: 11px; letter-spacing: 2px; padding: 3px 10px; font-weight: 600; }
+    .vnpay .tag b { color: #ed1c24; }
+    .vnpay h4 { font-family: var(--serif); font-size: 24px; font-weight: 600; margin: 10px 0 4px; }
+    .vnpay p { font-size: 13px; color: #6f6255; line-height: 1.7; margin: 0 0 14px; }
+    .or { display: flex; align-items: center; gap: 12px; margin: 26px 0 6px; color: var(--muted); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; }
+    .or::before, .or::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+    .qr-box.bank::before { content: 'VietQR'; background: #1a3c8f; }
+    .waiting { display: flex; align-items: center; gap: 10px; justify-content: center; margin: 18px auto 0; max-width: 360px; font-size: 13px; color: #3d5a80; }
+    .waiting .dot { width: 10px; height: 10px; border-radius: 50%; background: #3d7a55; animation: pulse 1.2s infinite; }
+    @@keyframes pulse { 0%,100% { opacity: .25; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.15); } }
+    .paid-ok { position: fixed; inset: 0; background: rgba(23,19,15,.6); display: none; place-items: center; z-index: 2000; }
+    .paid-ok > div { background: #fff; padding: 46px 54px; text-align: center; max-width: 440px; }
+    .paid-ok .ic { width: 74px; height: 74px; border-radius: 50%; background: #3d7a55; color: #fff; font-size: 38px; display: grid; place-items: center; margin: 0 auto 16px; }
+    .paid-ok h3 { font-size: 34px; font-weight: 500; }
+    .pay-policy { max-width: 1040px; margin: 0 auto 80px; padding: 0 0; }
+    @@media (max-width: 860px) { .pay { grid-template-columns: 1fr; margin: 110px 16px 0; } .pay-policy { margin: 0 16px 60px; } }
+</style>
+
+<div class="pay reveal">
+    <div class="left">
+        <div class="eyebrow" style="color:var(--champagne)">Xác nhận đặt cọc</div>
+        <h2>Phòng @string.Join(" · ", Model.RoomNumbers)</h2>
+        <div class="row"><span>Mã booking</span><b style="font-family:'Courier New';letter-spacing:1px">@Model.BookingCode</b></div>
+        <div class="row"><span>Nhận phòng</span><b>@Model.CheckInDate.ToString("HH:mm · dd/MM/yyyy")</b></div>
+        <div class="row"><span>Trả phòng</span><b>@Model.CheckOutDate.ToString("HH:mm · dd/MM/yyyy")</b></div>
+        <div class="row"><span>Tổng tiền phòng</span><b>@Model.TotalPrice.ToString("N0")₫</b></div>
+        <div class="row"><span>Thanh toán khi trả phòng</span><b>@((Model.TotalPrice - Model.DepositAmount).ToString("N0"))₫</b></div>
+        <div style="margin-top:30px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#b3a48f">Số tiền cọc (30%)</div>
+        <div class="total">@Model.DepositAmount.ToString("N0")₫</div>
+    </div>
+
+    <div class="right">
+        @if (bank != null)
+        {
+            <h3>Chuyển khoản để đặt cọc</h3>
+            <p style="font-size:13px;color:#6f6255;margin-top:4px">Quét bằng app ngân hàng bất kỳ hoặc MoMo — booking <b>tự xác nhận</b> ngay khi tiền vào.</p>
+            <div class="qr-box bank">
+                <img src="@bank.QrImageUrl" alt="QR chuyển khoản" />
+            </div>
+            <div class="info">
+                <div><span>Ngân hàng</span><b>@(bank.BankCode == "MB" ? "MB Bank" : bank.BankCode)</b></div>
+                <div><span>Số tài khoản</span><b>@bank.AccountNumber</b><button type="button" class="copy" onclick="cp('@bank.AccountNumber',this)">SAO CHÉP</button></div>
+                <div><span>Chủ tài khoản</span><b>@bank.AccountName</b></div>
+                <div><span>Số tiền</span><b class="big">@bank.Amount.ToString("N0")₫</b><button type="button" class="copy" onclick="cp('@((long)bank.Amount)',this)">SAO CHÉP</button></div>
+                <div><span>Nội dung chuyển</span><b style="font-family:'Courier New'">@bank.Content</b><button type="button" class="copy" onclick="cp('@bank.Content',this)">SAO CHÉP</button></div>
+            </div>
+            <div class="waiting" id="waiting"><span class="dot"></span> Đang chờ nhận tiền… trang sẽ tự cập nhật khi chuyển khoản thành công</div>
+            <div class="warn">Giữ <b>đúng nội dung chuyển khoản</b> để hệ thống nhận ra booking của bạn. Chuyển đủ số tiền cọc.</div>
+
+        }
+        @if (bank == null)
+        {
+                        <h3>Quét mã MoMo để đặt cọc</h3>
+            <div class="qr-box">
+                <img src="@MomoQrImage" alt="QR MoMo" onerror="this.style.display='none';document.getElementById('qrMissing').style.display='block'" />
+                <div class="qr-missing" id="qrMissing">Chưa có ảnh QR.<br />Đặt file vào <b>wwwroot/images/momo-qr.png</b></div>
+            </div>
+            <div class="info">
+                <div><span>Người nhận</span><b>@MomoName</b></div>
+                <div><span>Số MoMo</span><b>@MomoPhone</b></div>
+                <div><span>Số tiền</span><b class="big">@Model.DepositAmount.ToString("N0")₫</b><button type="button" class="copy" onclick="cp('@((long)Model.DepositAmount)',this)">SAO CHÉP</button></div>
+                <div><span>Nội dung chuyển</span><b style="font-family:'Courier New'">@Model.BookingCode</b><button type="button" class="copy" onclick="cp('@Model.BookingCode',this)">SAO CHÉP</button></div>
+            </div>
+            <div class="warn">Chuyển khoản MoMo cần lễ tân đối chiếu rồi mới xác nhận booking.</div>
+            <form asp-action="ReportTransfer" method="post" style="margin-top:22px">
+                <input type="hidden" name="bookingId" value="@Model.Id" />
+                <button class="btn-lux block">Tôi đã chuyển khoản MoMo</button>
+            </form>
+        }
+        <a class="btn-lux ghost block" style="margin-top:10px" href="/Bookings/MyBookings">Để sau</a>
+
+    </div>
+</div>
+
+<div class="pay-policy reveal">
+    @{ ViewData["PolicyNights"] = Model.Nights; }
+    <partial name="_CancellationPolicy" view-data="ViewData" />
+</div>
+<div class="paid-ok" id="paidOk"><div><div class="ic">✓</div><h3>Đặt cọc thành công</h3><p style="color:#6f6255">Đã nhận tiền cọc, booking <b>@Model.BookingCode</b> đã được xác nhận.</p><a class="btn-lux gold" href="/Bookings/MyBookings">Xem kỳ nghỉ của tôi</a></div></div>
+<script>
+    // Mỗi 4 giây hỏi server booking đã được xác nhận chưa (SePay báo tiền vào -> API xác nhận)
+    (function poll() {
+        fetch('/Bookings/PaymentStatus/@Model.Id', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) {
+            if (d.paid || d.status === 'Confirmed') { document.getElementById('paidOk').style.display = 'grid'; return; }
+            setTimeout(poll, 4000);
+        }).catch(function () { setTimeout(poll, 6000); });
+    })();
+    function cp(t, b) { navigator.clipboard.writeText(t).then(function () { var o = b.textContent; b.textContent = 'ĐÃ CHÉP'; setTimeout(function () { b.textContent = o; }, 1500); }); }
+</script>

@@ -1,0 +1,66 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<StaffAccountDTO>
+@{
+    Layout = "_AdminLayout";
+    var counts = ViewBag.Counts as Dictionary<string, int> ?? new();
+    string? fr = ViewBag.FilterRole;
+}
+<div class="stat-grid">
+    @foreach (var r in new[] { "Manager", "Receptionist", "Customer" })
+    {
+        <div class="stat-box"><div class="label">@RoleHelper.RoleLabel(r)</div><div class="value">@(counts.TryGetValue(r, out var n) ? n : 0)</div></div>
+    }
+</div>
+<div class="card">
+    <h3>Tạo tài khoản nhân viên <small>Quản lý xóa được tài khoản cấp dưới: Lễ tân và Khách hàng</small></h3>
+    <form class="mg-form" asp-action="AddStaff" method="post">
+        <div class="field grow"><label>Email đăng nhập</label><input type="email" name="Username" required /></div>
+        <div class="field"><label>Mật khẩu (≥ 6 ký tự)</label><input type="text" name="Password" minlength="6" required /></div>
+        <div class="field">
+            <label>Vai trò</label>
+            <select name="Roles[0]"><option value="Receptionist">Lễ tân</option><option value="Manager">Quản lý</option></select>
+        </div>
+        <button type="submit" class="btn btn-gold">+ Tạo tài khoản</button>
+    </form>
+</div>
+<div class="card">
+    <h3>
+        Tất cả tài khoản
+        <span class="tabs" style="margin:0">
+            <a class="@(string.IsNullOrEmpty(fr) ? "on" : "")" href="?">Tất cả</a>
+            <a class="@(fr == "Manager" ? "on" : "")" href="?role=Manager">Quản lý</a>
+            <a class="@(fr == "Receptionist" ? "on" : "")" href="?role=Receptionist">Lễ tân</a>
+            <a class="@(fr == "Customer" ? "on" : "")" href="?role=Customer">Khách hàng</a>
+        </span>
+    </h3>
+    <table class="admin-table">
+        <tr><th>Email</th><th>Vai trò</th><th>Quyền hạn</th><th></th></tr>
+        @foreach (var a in Model)
+        {
+            <tr>
+                <td><b>@a.Email</b></td>
+                <td><span class="pill pill-@a.RoleName">@RoleHelper.RoleLabel(a.RoleName)</span></td>
+                <td class="muted">
+                    @(a.RoleName switch
+                    {
+                        "Manager" => "Toàn quyền: phòng, booking, tài chính, nhân sự",
+                        "Receptionist" => "Booking, nhận/trả phòng, khách hàng, sơ đồ phòng",
+                        _ => "Đặt phòng, thanh toán cọc, xem/hủy booking của mình"
+                    })
+                </td>
+                <td class="right">
+                    @if (a.CanDelete)
+                    {
+                        <form asp-action="DeleteAccount" method="post" onsubmit="return confirm('Xóa tài khoản @a.Email?');">
+                            <input type="hidden" name="id" value="@a.Id" />
+                            <button class="btn btn-danger">Xóa</button>
+                        </form>
+                    }
+                    else { <span class="muted" style="font-size:12px">Không thể xóa</span> }
+                </td>
+            </tr>
+        }
+    </table>
+    @if (!Model.Any()) { <p class="empty">Không tải được danh sách (cần endpoint /api/User/get-all-accounts)</p> }
+</div>

@@ -1,0 +1,55 @@
+﻿@using Hotel_Web.Models.DTO
+@model RoomAvailableDTO
+@{
+    bool isSearch = ViewBag.IsSearchResult == true;
+    string? role = ViewBag.Role;
+    var ci = (string?)ViewBag.CheckIn;
+    var co = (string?)ViewBag.CheckOut;
+    var room = Model;
+    var img = room.ImageUrls.FirstOrDefault();
+}
+<article class="room reveal">
+    <a class="ph" href="/Rooms/Detail/@room.Id">
+        @if (!string.IsNullOrEmpty(img)) { <img src="@img" alt="Phòng @room.RoomNumber" loading="lazy" /> }
+        else { <div class="noimg">DAV</div> }
+        @if (isSearch) { <span class="tag">Còn trống</span> }
+        else if (room.Status == "Maintenance") { <span class="tag no">Đang bảo trì</span> }
+        else { <span class="tag">Tầng @room.Floor</span> }
+        <div class="view"><span>Xem chi tiết</span></div>
+    </a>
+    <div class="body">
+        <div class="type">@room.RoomTypeName</div>
+        <h3>Phòng @room.RoomNumber</h3>
+        <div class="desc">@(room.Description ?? "Không gian ấm cúng, nội thất cao cấp, đầy đủ tiện nghi.")</div>
+        <div class="meta"><span>Tối đa @room.MaxOccupancy khách</span>@if (isSearch) { <span>@room.Nights đêm</span> }</div>
+        <div class="price-row">
+            <div>
+                @if (isSearch)
+                {
+                    <div class="price">@room.TotalPriceForStay.ToString("N0")₫ <small>/ @room.Nights đêm</small></div>
+                    <div class="deposit">Đặt cọc 30%: @((room.TotalPriceForStay * 0.3m).ToString("N0"))₫</div>
+                }
+                else
+                {
+                    <div class="price">@room.BasePrice.ToString("N0")₫ <small>/ đêm</small></div>
+                }
+            </div>
+            @if (!isSearch) { <a class="btn-lux ghost" href="/Rooms/Detail/@room.Id">Chi tiết</a> }
+        </div>
+        @if (isSearch)
+        {
+            if (role == "Customer")
+            {
+                <a class="btn-lux block" style="margin-top:20px" href="/Bookings/Confirm?roomId=@room.Id&checkIn=@ci&checkOut=@co">Đặt phòng &amp; chọn dịch vụ</a>
+            }
+            else if (role == "Manager" || role == "Receptionist")
+            {
+                <a class="btn-lux block" style="margin-top:20px" href="/BookingManage/NewBooking?checkIn=@ci&checkOut=@co">Đặt cho khách tại quầy</a>
+            }
+            else
+            {
+                <a class="btn-lux gold block" style="margin-top:20px" href="/Account/Login?returnUrl=@Uri.EscapeDataString(Context.Request.Path + Context.Request.QueryString)">Đăng nhập để đặt phòng</a>
+            }
+        }
+    </div>
+</article>

@@ -1,0 +1,201 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@{
+    var role = RoleHelper.MainRole(Context.Session);
+    var isStaff = role == "Manager" || role == "Receptionist";
+    var username = Context.Session.GetString("Username");
+    var path = (Context.Request.Path.Value ?? "").ToLower();
+    bool transparent = ViewData["TransparentHeader"] as bool? == true;
+    var displayName = string.IsNullOrEmpty(username) ? "" : username.Split('@')[0];
+    var initial = string.IsNullOrEmpty(displayName) ? "?" : displayName.Substring(0, 1).ToUpper();
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@(ViewData["Title"] ?? "DAV Hotel") · Nghỉ dưỡng thượng lưu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --espresso: #17130f; --ink: #2a221b; --gold: #b8925a; --champagne: #d9b98a; --ivory: #faf7f2; --sand: #f1ebe1;
+            --muted: #8c7f70; --line: #e7dfd2; --serif: 'Cormorant Garamond', serif; --sans: 'Jost', sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { font-family: var(--sans); background: var(--ivory); color: var(--ink); font-weight: 400; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+        h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; line-height: 1.15; }
+        a { color: inherit; }
+        .container { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
+        .eyebrow { font-size: 12px; letter-spacing: 5px; text-transform: uppercase; color: var(--gold); font-weight: 500; }
+        .gold-rule { width: 64px; height: 1px; background: var(--gold); margin: 18px auto; }
+
+        /* ===== Header ===== */
+        header.site { position: fixed; top: 0; left: 0; right: 0; z-index: 100; transition: background .4s, padding .4s, box-shadow .4s; padding: 22px 0; }
+        header.site.solid, header.site.scrolled { background: rgba(23,19,15,.96); backdrop-filter: blur(10px); padding: 14px 0; box-shadow: 0 6px 30px rgba(0,0,0,.15); }
+        header.site .container { display: flex; align-items: center; justify-content: space-between; }
+        .brand { text-decoration: none; color: #fff; display: flex; flex-direction: column; line-height: 1; }
+        .brand b { font-family: var(--serif); font-size: 34px; font-weight: 700; letter-spacing: 8px; color: var(--champagne); }
+        .brand span { font-size: 9px; letter-spacing: 6px; text-transform: uppercase; color: #e9dfcf; margin-top: 4px; }
+        nav.main-nav { display: flex; align-items: center; gap: 34px; }
+        nav.main-nav a { color: #efe6d8; text-decoration: none; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; position: relative; padding: 4px 0; }
+        nav.main-nav a::after { content: ''; position: absolute; left: 50%; bottom: -2px; width: 0; height: 1px; background: var(--champagne); transition: all .35s; }
+        nav.main-nav a:hover, nav.main-nav a.on { color: var(--champagne); }
+        nav.main-nav a:hover::after, nav.main-nav a.on::after { left: 0; width: 100%; }
+        nav.main-nav .btn-reserve { border: 1px solid var(--champagne); padding: 11px 24px; color: var(--champagne); margin-left: 6px; }
+        nav.main-nav .btn-reserve:hover { background: var(--champagne); color: var(--espresso); }
+        nav.main-nav .btn-reserve::after { display: none; }
+
+        /* ===== User menu ===== */
+        .user-menu { position: relative; }
+        .user-chip { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.04); border: 1px solid rgba(217,185,138,.35);
+                     border-radius: 40px; padding: 5px 14px 5px 5px; cursor: pointer; color: #efe6d8; font-family: var(--sans); font-size: 13px; transition: .25s; }
+        .user-chip:hover, .user-menu.open .user-chip { border-color: var(--champagne); background: rgba(217,185,138,.08); }
+        .user-chip .av { width: 30px; height: 30px; border-radius: 50%; background: var(--champagne); color: var(--espresso); display: grid; place-items: center;
+                         font-weight: 600; font-size: 13px; }
+        .user-chip .caret { width: 7px; height: 7px; border-right: 1.5px solid #cdbfa9; border-bottom: 1.5px solid #cdbfa9; transform: rotate(45deg) translateY(-2px); transition: transform .25s; margin-left: 2px; }
+        .user-menu.open .user-chip .caret { transform: rotate(-135deg) translate(-2px, 0); }
+        .dropdown { position: absolute; right: 0; top: calc(100% + 12px); min-width: 260px; background: #1f1a15; border: 1px solid #3a3027;
+                    box-shadow: 0 24px 50px rgba(0,0,0,.35); padding: 8px 0; opacity: 0; visibility: hidden; transform: translateY(-8px); transition: .25s; }
+        .user-menu.open .dropdown { opacity: 1; visibility: visible; transform: none; }
+        .dropdown .who { padding: 14px 22px 14px; border-bottom: 1px solid #3a3027; margin-bottom: 6px; }
+        .dropdown .who b { display: block; color: #fff; font-weight: 500; font-size: 14px; }
+        .dropdown .who span { color: var(--champagne); font-size: 12px; }
+        .dropdown .who em { display: inline-block; margin-top: 8px; font-style: normal; font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+                            color: var(--espresso); background: var(--champagne); padding: 3px 9px; }
+        nav.main-nav .dropdown a { display: block; padding: 11px 22px; font-size: 13.5px; letter-spacing: .3px; text-transform: none; color: #e6dccd; }
+        nav.main-nav .dropdown a::after { display: none; }
+        nav.main-nav .dropdown a:hover { background: rgba(217,185,138,.08); color: var(--champagne); padding-left: 26px; }
+        nav.main-nav .dropdown .sep { height: 1px; background: #3a3027; margin: 6px 0; }
+        nav.main-nav .dropdown a.out { color: #e3a59c; }
+        .menu-toggle { display: none; background: none; border: 1px solid #6b5d4d; color: var(--champagne); padding: 8px 12px; font-family: var(--sans); letter-spacing: 2px; font-size: 12px; cursor: pointer; }
+        @@media (max-width: 960px) {
+            .menu-toggle { display: block; }
+            nav.main-nav { display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--espresso); flex-direction: column; align-items: flex-start; padding: 24px; gap: 20px; }
+            nav.main-nav.open { display: flex; }
+            .dropdown { position: static; opacity: 1; visibility: visible; transform: none; display: none; margin-top: 10px; }
+            .user-menu.open .dropdown { display: block; }
+        }
+
+        .page-top { padding-top: 96px; }
+
+        /* ===== Flash messages ===== */
+        .flash-wrap { position: fixed; top: 96px; right: 24px; z-index: 200; display: flex; flex-direction: column; gap: 10px; max-width: 420px; }
+        .flash { padding: 16px 22px; background: #fff; border-left: 3px solid var(--gold); box-shadow: 0 14px 40px rgba(0,0,0,.14); font-size: 14px; animation: slideIn .5s ease, fadeOut .6s ease 6s forwards; }
+        .flash.err { border-left-color: #a8443b; }
+        .flash b { display: block; font-family: var(--serif); font-size: 18px; margin-bottom: 2px; }
+        @@keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
+        @@keyframes fadeOut { to { opacity: 0; transform: translateX(40px); visibility: hidden; } }
+
+        /* ===== Buttons & forms ===== */
+        .btn-lux { display: inline-block; padding: 15px 34px; background: var(--espresso); color: var(--champagne); border: 1px solid var(--espresso); font-family: var(--sans);
+                   font-size: 12px; letter-spacing: 3px; text-transform: uppercase; text-decoration: none; cursor: pointer; transition: all .35s; }
+        .btn-lux:hover { background: var(--gold); border-color: var(--gold); color: #fff; }
+        .btn-lux.gold { background: var(--gold); border-color: var(--gold); color: #fff; } .btn-lux.gold:hover { background: var(--espresso); border-color: var(--espresso); color: var(--champagne); }
+        .btn-lux.ghost { background: transparent; color: var(--ink); border-color: #cdbfa9; } .btn-lux.ghost:hover { border-color: var(--gold); color: var(--gold); background: transparent; }
+        .btn-lux.block { display: block; width: 100%; text-align: center; }
+        .fld { display: flex; flex-direction: column; gap: 6px; }
+        .fld label { font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); }
+        .fld input, .fld select, .fld textarea { padding: 13px 14px; border: 1px solid var(--line); background: #fff; font-family: var(--sans); font-size: 15px; color: var(--ink); transition: border .25s; }
+        .fld input:focus, .fld select:focus, .fld textarea:focus { outline: none; border-color: var(--gold); }
+
+        /* ===== Reveal on scroll ===== */
+        .reveal { opacity: 0; transform: translateY(40px); transition: opacity 1s ease, transform 1s ease; }
+        .reveal.in { opacity: 1; transform: none; }
+
+        /* ===== Footer ===== */
+        footer.site { background: var(--espresso); color: #b9ac9a; margin-top: 100px; }
+        footer.site .top { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 40px; padding: 70px 0 50px; border-bottom: 1px solid #2f271f; }
+        footer.site h4 { color: var(--champagne); font-size: 20px; margin-bottom: 16px; }
+        footer.site p, footer.site a { font-size: 14px; color: #b9ac9a; text-decoration: none; line-height: 2; }
+        footer.site a:hover { color: var(--champagne); }
+        footer.site .bottom { padding: 22px 0; font-size: 12px; letter-spacing: 1px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+        @@media (max-width: 860px) { footer.site .top { grid-template-columns: 1fr 1fr; } }
+    </style>
+    <link rel="stylesheet" href="~/css/dav.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="site @(transparent ? "" : "solid")" id="siteHeader">
+        <div class="container">
+            <a class="brand" href="/Rooms/Index"><b>DAV</b><span>Hotel &amp; Resort</span></a>
+            <button class="menu-toggle" onclick="document.getElementById('mainNav').classList.toggle('open')">MENU</button>
+            <nav class="main-nav" id="mainNav">
+                <a class="@(path == "/" || path == "/rooms" || path.StartsWith("/rooms/index") ? "on" : "")" href="/Rooms/Index">Trang chủ</a>
+                <a class="@(path.StartsWith("/rooms/list") || path.StartsWith("/rooms/detail") || path.StartsWith("/rooms/search") ? "on" : "")" href="/Rooms/List">Phòng nghỉ</a>
+                <a class="@(path.StartsWith("/services") ? "on" : "")" href="/Services">Dịch vụ</a>
+                <a class="btn-reserve" href="/Rooms/List#book">Đặt phòng</a>
+                @if (!string.IsNullOrEmpty(username))
+                {
+                    <div class="user-menu" id="userMenu">
+                        <button type="button" class="user-chip" onclick="document.getElementById('userMenu').classList.toggle('open')">
+                            <span class="av">@initial</span><span>@displayName</span><span class="caret"></span>
+                        </button>
+                        <div class="dropdown">
+                            <div class="who"><b>@displayName</b><span>@username</span><br /><em>@RoleHelper.RoleLabel(role)</em></div>
+                            @if (isStaff)
+                            {
+                                <a href="/Manage/Dashboard">Vào trang quản trị</a>
+                            }
+                            @if (role == "Customer")
+                            {
+                                <a href="/Bookings/MyBookings">Kỳ nghỉ của tôi</a>
+                            }
+                            <a href="/Account/ChangePassword">Đổi mật khẩu</a>
+                            <div class="sep"></div>
+                            <a class="out" href="/Account/Logout">Đăng xuất</a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <a class="@(path.StartsWith("/account/login") ? "on" : "")" href="/Account/Login@(path.StartsWith("/account") ? "" : "?returnUrl=" + Uri.EscapeDataString(Context.Request.Path + Context.Request.QueryString))">Đăng nhập</a>
+                }
+            </nav>
+        </div>
+    </header>
+
+    <div class="flash-wrap">
+        @if (TempData["Message"] != null) { <div class="flash"><b>Thành công</b>@TempData["Message"]</div> }
+        @if (TempData["Error"] != null) { <div class="flash err"><b>Thông báo</b>@TempData["Error"]</div> }
+    </div>
+
+    @RenderBody()
+
+    <footer class="site">
+        <div class="container">
+            <div class="top">
+                <div>
+                    <a class="brand" href="/Rooms/Index" style="margin-bottom:18px"><b>DAV</b><span>Hotel &amp; Resort</span></a>
+                    <p style="margin-top:18px;max-width:320px">Nơi sự tinh tế gặp gỡ lòng hiếu khách. Mỗi kỳ nghỉ tại DAV là một câu chuyện được chăm chút từ những chi tiết nhỏ nhất.</p>
+                </div>
+                <div><h4>Khám phá</h4><a href="/Rooms/List">Phòng nghỉ</a><br /><a href="/Services">Dịch vụ</a><br /><a href="/Bookings/MyBookings">Kỳ nghỉ của tôi</a></div>
+                <div><h4>Liên hệ</h4><p>123 XUÂN THÀNH<br />ĐÀ LẠT, Việt Nam<br />+84 0818709706<br />3MẶTTRỜINH@davhotel.vn</p></div>
+                <div><h4>Chính sách</h4><p>Nhận phòng từ 14:00<br />Trả phòng trước 12:00<br />Đặt cọc 30% để giữ phòng<br />Hủy miễn phí khi chưa cọc</p></div>
+            </div>
+            <div class="bottom"><span>© @DateTime.Now.Year DAV Hotel &amp; Resort. All rights reserved.</span><span>Thiết kế cho kỳ nghỉ đáng nhớ</span></div>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var h = document.getElementById('siteHeader');
+            var onScroll = function () { h.classList.toggle('scrolled', window.scrollY > 60); };
+            window.addEventListener('scroll', onScroll); onScroll();
+            var io = new IntersectionObserver(function (es) {
+                es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+            }, { threshold: 0.12 });
+            document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+            // đóng menu tài khoản khi bấm ra ngoài hoặc nhấn Esc
+            document.addEventListener('click', function (e) {
+                var m = document.getElementById('userMenu');
+                if (m && !m.contains(e.target)) m.classList.remove('open');
+            });
+            document.addEventListener('keydown', function (e) {
+                var m = document.getElementById('userMenu');
+                if (m && e.key === 'Escape') m.classList.remove('open');
+            });
+        })();
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

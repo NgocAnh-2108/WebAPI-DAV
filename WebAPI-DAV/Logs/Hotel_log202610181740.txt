@@ -1,0 +1,522 @@
+2026-10-18 17:40:06.442 +07:00 [INF] Request starting HTTP/1.1 POST https://localhost:7167/api/User/Login - application/json; charset=utf-8 null
+2026-10-18 17:40:06.454 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.UserController.Login (WebAPI-DAV)'
+2026-10-18 17:40:06.464 +07:00 [INF] Route matched with {action = "Login", controller = "User"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Login(WebAPI_DAV.Models.DTO.LoginRequestDTO) on controller WebAPI_DAV.Controllers.UserController (WebAPI-DAV).
+2026-10-18 17:40:06.774 +07:00 [INF] Executed DbCommand (34ms) [Parameters=[@__normalizedEmail_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(2) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedEmail] = @__normalizedEmail_0
+2026-10-18 17:40:07.075 +07:00 [INF] Executed DbCommand (21ms) [Parameters=[@__userId_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a0].[Name]
+FROM [AspNetUserRoles] AS [a]
+INNER JOIN [AspNetRoles] AS [a0] ON [a].[RoleId] = [a0].[Id]
+WHERE [a].[UserId] = @__userId_0
+2026-10-18 17:40:07.142 +07:00 [INF] Executing OkObjectResult, writing value of type 'WebAPI_DAV.Models.DTO.LoginResponseDTO'.
+2026-10-18 17:40:07.146 +07:00 [INF] Executed action WebAPI_DAV.Controllers.UserController.Login (WebAPI-DAV) in 679.226ms
+2026-10-18 17:40:07.150 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.UserController.Login (WebAPI-DAV)'
+2026-10-18 17:40:07.155 +07:00 [INF] Request finished HTTP/1.1 POST https://localhost:7167/api/User/Login - 200 null application/json; charset=utf-8 712.6693ms
+2026-10-18 17:40:07.243 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/RoomTypes/get-all-roomtypes - null null
+2026-10-18 17:40:07.323 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.RoomTypesController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:07.326 +07:00 [INF] Route matched with {action = "GetAll", controller = "RoomTypes"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetAll() on controller WebAPI_DAV.Controllers.RoomTypesController (WebAPI-DAV).
+2026-10-18 17:40:07.358 +07:00 [INF] Executed DbCommand (15ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [r].[Id], [r].[Name], [r].[Description], [r].[BasePrice], [r].[MaxOccupancy]
+FROM [RoomTypes] AS [r]
+2026-10-18 17:40:07.362 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.RoomTypeDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:07.364 +07:00 [INF] Executed action WebAPI_DAV.Controllers.RoomTypesController.GetAll (WebAPI-DAV) in 35.4126ms
+2026-10-18 17:40:07.367 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.RoomTypesController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:07.369 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/RoomTypes/get-all-roomtypes - 200 null application/json; charset=utf-8 126.4216ms
+2026-10-18 17:40:07.378 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/Rooms/get-all-rooms?pageSize=1000&sortBy=price - null null
+2026-10-18 17:40:07.385 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.RoomsController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:07.387 +07:00 [INF] Route matched with {action = "GetAll", controller = "Rooms"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetAll(System.String, System.String, System.String, Boolean, Int32, Int32) on controller WebAPI_DAV.Controllers.RoomsController (WebAPI-DAV).
+2026-10-18 17:40:07.413 +07:00 [INF] Executed DbCommand (14ms) [Parameters=[@__p_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [r].[Id], [r].[RoomNumber], [r].[Status], (
+    SELECT TOP(1) [i].[FilePath]
+    FROM [Images] AS [i]
+    WHERE [i].[RoomId] = [r].[Id]
+    ORDER BY [i].[Id] DESC) AS [ImageUrl], [r].[Floor], [r0].[Name] AS [RoomTypeName], [r0].[BasePrice]
+FROM [Rooms] AS [r]
+INNER JOIN [RoomTypes] AS [r0] ON [r].[RoomTypeId] = [r0].[Id]
+ORDER BY [r0].[BasePrice]
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+2026-10-18 17:40:07.418 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.RoomDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:07.420 +07:00 [INF] Executed action WebAPI_DAV.Controllers.RoomsController.GetAll (WebAPI-DAV) in 29.6574ms
+2026-10-18 17:40:07.422 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.RoomsController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:07.424 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/Rooms/get-all-rooms?pageSize=1000&sortBy=price - 200 null application/json; charset=utf-8 46.4306ms
+2026-10-18 17:40:07.434 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/Services/get-all-services - null null
+2026-10-18 17:40:07.440 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.ServicesController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:07.442 +07:00 [INF] Route matched with {action = "GetAll", controller = "Services"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetAll(Boolean, System.String) on controller WebAPI_DAV.Controllers.ServicesController (WebAPI-DAV).
+2026-10-18 17:40:07.466 +07:00 [INF] Executed DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [s].[Id], [s].[Name], [s].[Description], [s].[Category], [s].[Price], [s].[Unit], [s].[IsActive], (
+    SELECT COUNT(*)
+    FROM [BookingServices] AS [b]
+    WHERE [s].[Id] = [b].[ServiceId]) AS [UsageCount]
+FROM [Services] AS [s]
+WHERE [s].[IsActive] = CAST(1 AS bit)
+ORDER BY [s].[Category], [s].[Name]
+2026-10-18 17:40:07.471 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.ServiceDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:07.474 +07:00 [INF] Executed action WebAPI_DAV.Controllers.ServicesController.GetAll (WebAPI-DAV) in 29.4517ms
+2026-10-18 17:40:07.477 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.ServicesController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:07.479 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/Services/get-all-services - 200 null application/json; charset=utf-8 45.6651ms
+2026-10-18 17:40:13.930 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/RoomTypes/get-all-roomtypes - null null
+2026-10-18 17:40:13.934 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.RoomTypesController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:13.936 +07:00 [INF] Route matched with {action = "GetAll", controller = "RoomTypes"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetAll() on controller WebAPI_DAV.Controllers.RoomTypesController (WebAPI-DAV).
+2026-10-18 17:40:13.949 +07:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [r].[Id], [r].[Name], [r].[Description], [r].[BasePrice], [r].[MaxOccupancy]
+FROM [RoomTypes] AS [r]
+2026-10-18 17:40:13.954 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.RoomTypeDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:13.955 +07:00 [INF] Executed action WebAPI_DAV.Controllers.RoomTypesController.GetAll (WebAPI-DAV) in 16.6254ms
+2026-10-18 17:40:13.957 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.RoomTypesController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:13.959 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/RoomTypes/get-all-roomtypes - 200 null application/json; charset=utf-8 29.5079ms
+2026-10-18 17:40:13.969 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/Rooms/get-all-rooms?pageSize=1000&sortBy=price - null null
+2026-10-18 17:40:13.973 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.RoomsController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:13.974 +07:00 [INF] Route matched with {action = "GetAll", controller = "Rooms"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetAll(System.String, System.String, System.String, Boolean, Int32, Int32) on controller WebAPI_DAV.Controllers.RoomsController (WebAPI-DAV).
+2026-10-18 17:40:13.985 +07:00 [INF] Executed DbCommand (1ms) [Parameters=[@__p_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [r].[Id], [r].[RoomNumber], [r].[Status], (
+    SELECT TOP(1) [i].[FilePath]
+    FROM [Images] AS [i]
+    WHERE [i].[RoomId] = [r].[Id]
+    ORDER BY [i].[Id] DESC) AS [ImageUrl], [r].[Floor], [r0].[Name] AS [RoomTypeName], [r0].[BasePrice]
+FROM [Rooms] AS [r]
+INNER JOIN [RoomTypes] AS [r0] ON [r].[RoomTypeId] = [r0].[Id]
+ORDER BY [r0].[BasePrice]
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+2026-10-18 17:40:13.989 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.RoomDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:13.991 +07:00 [INF] Executed action WebAPI_DAV.Controllers.RoomsController.GetAll (WebAPI-DAV) in 14.6253ms
+2026-10-18 17:40:13.993 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.RoomsController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:13.995 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/Rooms/get-all-rooms?pageSize=1000&sortBy=price - 200 null application/json; charset=utf-8 25.7861ms
+2026-10-18 17:40:15.471 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/RoomTypes/get-all-roomtypes - null null
+2026-10-18 17:40:15.475 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.RoomTypesController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:15.477 +07:00 [INF] Route matched with {action = "GetAll", controller = "RoomTypes"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetAll() on controller WebAPI_DAV.Controllers.RoomTypesController (WebAPI-DAV).
+2026-10-18 17:40:15.486 +07:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [r].[Id], [r].[Name], [r].[Description], [r].[BasePrice], [r].[MaxOccupancy]
+FROM [RoomTypes] AS [r]
+2026-10-18 17:40:15.489 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.RoomTypeDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:15.491 +07:00 [INF] Executed action WebAPI_DAV.Controllers.RoomTypesController.GetAll (WebAPI-DAV) in 12.0665ms
+2026-10-18 17:40:15.494 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.RoomTypesController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:15.495 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/RoomTypes/get-all-roomtypes - 200 null application/json; charset=utf-8 23.625ms
+2026-10-18 17:40:15.505 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/Rooms/get-all-rooms?pageSize=1000&sortBy=price - null null
+2026-10-18 17:40:15.509 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.RoomsController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:15.510 +07:00 [INF] Route matched with {action = "GetAll", controller = "Rooms"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetAll(System.String, System.String, System.String, Boolean, Int32, Int32) on controller WebAPI_DAV.Controllers.RoomsController (WebAPI-DAV).
+2026-10-18 17:40:15.522 +07:00 [INF] Executed DbCommand (1ms) [Parameters=[@__p_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [r].[Id], [r].[RoomNumber], [r].[Status], (
+    SELECT TOP(1) [i].[FilePath]
+    FROM [Images] AS [i]
+    WHERE [i].[RoomId] = [r].[Id]
+    ORDER BY [i].[Id] DESC) AS [ImageUrl], [r].[Floor], [r0].[Name] AS [RoomTypeName], [r0].[BasePrice]
+FROM [Rooms] AS [r]
+INNER JOIN [RoomTypes] AS [r0] ON [r].[RoomTypeId] = [r0].[Id]
+ORDER BY [r0].[BasePrice]
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+2026-10-18 17:40:15.526 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.RoomDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:15.529 +07:00 [INF] Executed action WebAPI_DAV.Controllers.RoomsController.GetAll (WebAPI-DAV) in 16.2396ms
+2026-10-18 17:40:15.530 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.RoomsController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:15.532 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/Rooms/get-all-rooms?pageSize=1000&sortBy=price - 200 null application/json; charset=utf-8 27.084ms
+2026-10-18 17:40:15.546 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/RoomTypes/get-all-roomtypes - null null
+2026-10-18 17:40:15.550 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.RoomTypesController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:15.551 +07:00 [INF] Route matched with {action = "GetAll", controller = "RoomTypes"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetAll() on controller WebAPI_DAV.Controllers.RoomTypesController (WebAPI-DAV).
+2026-10-18 17:40:15.560 +07:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [r].[Id], [r].[Name], [r].[Description], [r].[BasePrice], [r].[MaxOccupancy]
+FROM [RoomTypes] AS [r]
+2026-10-18 17:40:15.564 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.RoomTypeDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:15.566 +07:00 [INF] Executed action WebAPI_DAV.Controllers.RoomTypesController.GetAll (WebAPI-DAV) in 12.6074ms
+2026-10-18 17:40:15.568 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.RoomTypesController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:15.570 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/RoomTypes/get-all-roomtypes - 200 null application/json; charset=utf-8 24.1925ms
+2026-10-18 17:40:15.580 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/Rooms/get-all-rooms?pageSize=1000&sortBy=price - null null
+2026-10-18 17:40:15.585 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.RoomsController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:15.586 +07:00 [INF] Route matched with {action = "GetAll", controller = "Rooms"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetAll(System.String, System.String, System.String, Boolean, Int32, Int32) on controller WebAPI_DAV.Controllers.RoomsController (WebAPI-DAV).
+2026-10-18 17:40:15.604 +07:00 [INF] Executed DbCommand (9ms) [Parameters=[@__p_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [r].[Id], [r].[RoomNumber], [r].[Status], (
+    SELECT TOP(1) [i].[FilePath]
+    FROM [Images] AS [i]
+    WHERE [i].[RoomId] = [r].[Id]
+    ORDER BY [i].[Id] DESC) AS [ImageUrl], [r].[Floor], [r0].[Name] AS [RoomTypeName], [r0].[BasePrice]
+FROM [Rooms] AS [r]
+INNER JOIN [RoomTypes] AS [r0] ON [r].[RoomTypeId] = [r0].[Id]
+ORDER BY [r0].[BasePrice]
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+2026-10-18 17:40:15.607 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.RoomDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:15.609 +07:00 [INF] Executed action WebAPI_DAV.Controllers.RoomsController.GetAll (WebAPI-DAV) in 20.7938ms
+2026-10-18 17:40:15.612 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.RoomsController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:15.613 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/Rooms/get-all-rooms?pageSize=1000&sortBy=price - 200 null application/json; charset=utf-8 32.7238ms
+2026-10-18 17:40:19.656 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/Rooms/get-room-by-id/1 - null null
+2026-10-18 17:40:19.660 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.RoomsController.GetById (WebAPI-DAV)'
+2026-10-18 17:40:19.663 +07:00 [INF] Route matched with {action = "GetById", controller = "Rooms"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetById(Int32) on controller WebAPI_DAV.Controllers.RoomsController (WebAPI-DAV).
+2026-10-18 17:40:19.685 +07:00 [INF] Executed DbCommand (6ms) [Parameters=[@__id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [r].[Id], [r].[RoomNumber], [r].[Status], (
+    SELECT TOP(1) [i].[FilePath]
+    FROM [Images] AS [i]
+    WHERE [i].[RoomId] = [r].[Id]
+    ORDER BY [i].[Id] DESC) AS [ImageUrl], [r].[Floor], [r0].[Name] AS [RoomTypeName], [r0].[BasePrice]
+FROM [Rooms] AS [r]
+INNER JOIN [RoomTypes] AS [r0] ON [r].[RoomTypeId] = [r0].[Id]
+WHERE [r].[Id] = @__id_0
+2026-10-18 17:40:19.689 +07:00 [INF] Executing OkObjectResult, writing value of type 'WebAPI_DAV.Models.DTO.RoomDTO'.
+2026-10-18 17:40:19.691 +07:00 [INF] Executed action WebAPI_DAV.Controllers.RoomsController.GetById (WebAPI-DAV) in 26.1327ms
+2026-10-18 17:40:19.693 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.RoomsController.GetById (WebAPI-DAV)'
+2026-10-18 17:40:19.695 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/Rooms/get-room-by-id/1 - 200 null application/json; charset=utf-8 39.7428ms
+2026-10-18 17:40:19.704 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/RoomTypes/get-all-roomtypes - null null
+2026-10-18 17:40:19.708 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.RoomTypesController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:19.710 +07:00 [INF] Route matched with {action = "GetAll", controller = "RoomTypes"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetAll() on controller WebAPI_DAV.Controllers.RoomTypesController (WebAPI-DAV).
+2026-10-18 17:40:19.719 +07:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [r].[Id], [r].[Name], [r].[Description], [r].[BasePrice], [r].[MaxOccupancy]
+FROM [RoomTypes] AS [r]
+2026-10-18 17:40:19.724 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.RoomTypeDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:19.727 +07:00 [INF] Executed action WebAPI_DAV.Controllers.RoomTypesController.GetAll (WebAPI-DAV) in 14.4644ms
+2026-10-18 17:40:19.729 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.RoomTypesController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:19.731 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/RoomTypes/get-all-roomtypes - 200 null application/json; charset=utf-8 26.9109ms
+2026-10-18 17:40:19.749 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/Services/get-all-services - null null
+2026-10-18 17:40:19.754 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.ServicesController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:19.755 +07:00 [INF] Route matched with {action = "GetAll", controller = "Services"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetAll(Boolean, System.String) on controller WebAPI_DAV.Controllers.ServicesController (WebAPI-DAV).
+2026-10-18 17:40:19.766 +07:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [s].[Id], [s].[Name], [s].[Description], [s].[Category], [s].[Price], [s].[Unit], [s].[IsActive], (
+    SELECT COUNT(*)
+    FROM [BookingServices] AS [b]
+    WHERE [s].[Id] = [b].[ServiceId]) AS [UsageCount]
+FROM [Services] AS [s]
+WHERE [s].[IsActive] = CAST(1 AS bit)
+ORDER BY [s].[Category], [s].[Name]
+2026-10-18 17:40:19.769 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.ServiceDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:19.772 +07:00 [INF] Executed action WebAPI_DAV.Controllers.ServicesController.GetAll (WebAPI-DAV) in 13.565ms
+2026-10-18 17:40:19.774 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.ServicesController.GetAll (WebAPI-DAV)'
+2026-10-18 17:40:19.776 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/Services/get-all-services - 200 null application/json; charset=utf-8 26.9144ms
+2026-10-18 17:40:22.265 +07:00 [INF] Request starting HTTP/1.1 POST https://localhost:7167/api/Bookings/book-room - application/json; charset=utf-8 null
+2026-10-18 17:40:22.279 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.BookingsController.BookRoom (WebAPI-DAV)'
+2026-10-18 17:40:22.282 +07:00 [INF] Route matched with {action = "BookRoom", controller = "Bookings"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult BookRoom(WebAPI_DAV.Models.DTO.CustomerBookingRequestDTO) on controller WebAPI_DAV.Controllers.BookingsController (WebAPI-DAV).
+2026-10-18 17:40:22.329 +07:00 [INF] Executed DbCommand (5ms) [Parameters=[@__userId_0='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [c].[Id], [c].[Address], [c].[Email], [c].[FullName], [c].[IdentityCard], [c].[Phone], [c].[UserId]
+FROM [Customers] AS [c]
+WHERE [c].[UserId] = @__userId_0
+2026-10-18 17:40:22.385 +07:00 [INF] Executed DbCommand (4ms) [Parameters=[@__roomId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [r].[Id], [r].[Floor], [r].[ImageUrl], [r].[RoomNumber], [r].[RoomTypeId], [r].[Status], [r0].[Id], [r0].[BasePrice], [r0].[Description], [r0].[MaxOccupancy], [r0].[Name]
+FROM [Rooms] AS [r]
+INNER JOIN [RoomTypes] AS [r0] ON [r].[RoomTypeId] = [r0].[Id]
+WHERE [r].[Id] = @__roomId_0
+2026-10-18 17:40:22.494 +07:00 [INF] Executed DbCommand (11ms) [Parameters=[@__roomId_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32), @__from_2='?' (DbType = DateTime2), @__to_3='?' (DbType = DateTime2)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [BookingRooms] AS [b]
+        INNER JOIN [Bookings] AS [b0] ON [b].[BookingId] = [b0].[Id]
+        WHERE [b].[RoomId] = @__roomId_0 AND [b].[BookingId] <> @__p_1 AND [b0].[Status] NOT IN (N'Cancelled', N'CheckedOut', N'NoShow') AND @__from_2 < [b0].[CheckOutDate] AND @__to_3 > [b0].[CheckInDate]) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2026-10-18 17:40:22.552 +07:00 [INF] Executed DbCommand (8ms) [Parameters=[@__serviceIds_0='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [s].[Id], [s].[Category], [s].[Description], [s].[IsActive], [s].[Name], [s].[Price], [s].[Unit]
+FROM [Services] AS [s]
+WHERE [s].[Id] IN (
+    SELECT [s0].[value]
+    FROM OPENJSON(@__serviceIds_0) WITH ([value] int '$') AS [s0]
+) AND [s].[IsActive] = CAST(1 AS bit)
+2026-10-18 17:40:22.776 +07:00 [INF] Executed DbCommand (8ms) [Parameters=[@p0='?' (Size = 4000), @p1='?' (Size = 4000), @p2='?' (Precision = 18) (Scale = 2) (DbType = Decimal), @p3='?' (DbType = DateTime2), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (DbType = DateTime2), @p7='?' (DbType = Int32), @p8='?' (Precision = 18) (Scale = 2) (DbType = Decimal), @p9='?' (DbType = Boolean), @p10='?' (Size = 4000), @p11='?' (Size = 4000), @p12='?' (Size = 4000), @p13='?' (Precision = 18) (Scale = 2) (DbType = Decimal), @p14='?' (Size = 4000), @p15='?' (Size = 4000), @p16='?' (Size = 4000), @p17='?' (DbType = DateTime2), @p18='?' (Precision = 18) (Scale = 2) (DbType = Decimal), @p19='?' (Size = 4000), @p20='?' (Precision = 18) (Scale = 2) (DbType = Decimal)], CommandType='"Text"', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [Bookings] ([BookingCode], [CancelReason], [CancellationFee], [CancelledDate], [CheckInDate], [CheckOutDate], [CreatedDate], [CustomerID], [DepositAmount], [IsDepositPaid], [Note], [RefundAccountName], [RefundAccountNumber], [RefundAmount], [RefundBankCode], [RefundNote], [RefundStatus], [RefundedDate], [RoomChangeDiscount], [Status], [TotalPrice])
+OUTPUT INSERTED.[Id]
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20);
+2026-10-18 17:40:22.822 +07:00 [INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [BookingRooms] ([BookingId], [RoomId])
+OUTPUT INSERTED.[Id]
+VALUES (@p0, @p1);
+2026-10-18 17:40:22.878 +07:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2026-10-18 17:40:22.915 +07:00 [INF] Executed DbCommand (23ms) [Parameters=[@__id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT [t].[Id], [t].[BookingCode], [t].[CheckInDate], [t].[CheckOutDate], [t].[Status], [t].[TotalPrice], [t].[DepositAmount], [t].[IsDepositPaid], [t].[CreatedDate], [t].[Note], [t].[CustomerID], [t].[FullName], [t].[Phone], [t].[Id0], [t0].[RoomNumber], [t0].[Id], [t0].[Id0], [t1].[RoomId], [t1].[RoomNumber], [t1].[RoomTypeName], [t1].[BasePrice], [t1].[Id], [t1].[Id0], [t1].[Id1], [t].[CancelledDate], [t].[CancelReason], [t].[CancellationFee], [t].[RefundAmount], [t].[RefundStatus], [t].[RefundBankCode], [t].[RefundAccountNumber], [t].[RefundAccountName], [t].[RefundedDate], [t].[RefundNote], [t].[RoomChangeDiscount]
+FROM (
+    SELECT TOP(1) [b].[Id], [b].[BookingCode], [b].[CheckInDate], [b].[CheckOutDate], [b].[Status], [b].[TotalPrice], [b].[DepositAmount], [b].[IsDepositPaid], [b].[CreatedDate], [b].[Note], [b].[CustomerID], [c].[FullName], [c].[Phone], [b].[CancelledDate], [b].[CancelReason], [b].[CancellationFee], [b].[RefundAmount], [b].[RefundStatus], [b].[RefundBankCode], [b].[RefundAccountNumber], [b].[RefundAccountName], [b].[RefundedDate], [b].[RefundNote], [b].[RoomChangeDiscount], [c].[Id] AS [Id0]
+    FROM [Bookings] AS [b]
+    INNER JOIN [Customers] AS [c] ON [b].[CustomerID] = [c].[Id]
+    WHERE [b].[Id] = @__id_0
+) AS [t]
+LEFT JOIN (
+    SELECT [r].[RoomNumber], [b0].[Id], [r].[Id] AS [Id0], [b0].[BookingId]
+    FROM [BookingRooms] AS [b0]
+    INNER JOIN [Rooms] AS [r] ON [b0].[RoomId] = [r].[Id]
+) AS [t0] ON [t].[Id] = [t0].[BookingId]
+LEFT JOIN (
+    SELECT [b1].[RoomId], [r0].[RoomNumber], [r1].[Name] AS [RoomTypeName], [r1].[BasePrice], [b1].[Id], [r0].[Id] AS [Id0], [r1].[Id] AS [Id1], [b1].[BookingId]
+    FROM [BookingRooms] AS [b1]
+    INNER JOIN [Rooms] AS [r0] ON [b1].[RoomId] = [r0].[Id]
+    INNER JOIN [RoomTypes] AS [r1] ON [r0].[RoomTypeId] = [r1].[Id]
+) AS [t1] ON [t].[Id] = [t1].[BookingId]
+ORDER BY [t].[Id], [t].[Id0], [t0].[Id], [t0].[Id0], [t1].[Id], [t1].[Id0]
+2026-10-18 17:40:22.927 +07:00 [INF] Executing OkObjectResult, writing value of type '<>f__AnonymousType1`2[[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[WebAPI_DAV.Models.DTO.BookingWithDetailDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:22.949 +07:00 [INF] Executed action WebAPI_DAV.Controllers.BookingsController.BookRoom (WebAPI-DAV) in 664.4491ms
+2026-10-18 17:40:22.951 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.BookingsController.BookRoom (WebAPI-DAV)'
+2026-10-18 17:40:22.953 +07:00 [INF] Request finished HTTP/1.1 POST https://localhost:7167/api/Bookings/book-room - 200 null application/json; charset=utf-8 687.4298ms
+2026-10-18 17:40:22.996 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - null null
+2026-10-18 17:40:23.005 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:23.008 +07:00 [INF] Route matched with {action = "GetMyBookings", controller = "Bookings"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetMyBookings() on controller WebAPI_DAV.Controllers.BookingsController (WebAPI-DAV).
+2026-10-18 17:40:23.028 +07:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2026-10-18 17:40:23.071 +07:00 [INF] Executed DbCommand (31ms) [Parameters=[@__userId_0='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[BookingCode], [b].[CheckInDate], [b].[CheckOutDate], [b].[Status], [b].[TotalPrice], [b].[DepositAmount], [b].[IsDepositPaid], [b].[CreatedDate], [b].[Note], [b].[CustomerID], [c].[FullName], [c].[Phone], [c].[Id], [t].[RoomNumber], [t].[Id], [t].[Id0], [t0].[RoomId], [t0].[RoomNumber], [t0].[RoomTypeName], [t0].[BasePrice], [t0].[Id], [t0].[Id0], [t0].[Id1], [b].[CancelledDate], [b].[CancelReason], [b].[CancellationFee], [b].[RefundAmount], [b].[RefundStatus], [b].[RefundBankCode], [b].[RefundAccountNumber], [b].[RefundAccountName], [b].[RefundedDate], [b].[RefundNote], [b].[RoomChangeDiscount]
+FROM [Bookings] AS [b]
+INNER JOIN [Customers] AS [c] ON [b].[CustomerID] = [c].[Id]
+LEFT JOIN (
+    SELECT [r].[RoomNumber], [b0].[Id], [r].[Id] AS [Id0], [b0].[BookingId]
+    FROM [BookingRooms] AS [b0]
+    INNER JOIN [Rooms] AS [r] ON [b0].[RoomId] = [r].[Id]
+) AS [t] ON [b].[Id] = [t].[BookingId]
+LEFT JOIN (
+    SELECT [b1].[RoomId], [r0].[RoomNumber], [r1].[Name] AS [RoomTypeName], [r1].[BasePrice], [b1].[Id], [r0].[Id] AS [Id0], [r1].[Id] AS [Id1], [b1].[BookingId]
+    FROM [BookingRooms] AS [b1]
+    INNER JOIN [Rooms] AS [r0] ON [b1].[RoomId] = [r0].[Id]
+    INNER JOIN [RoomTypes] AS [r1] ON [r0].[RoomTypeId] = [r1].[Id]
+) AS [t0] ON [b].[Id] = [t0].[BookingId]
+WHERE [c].[UserId] = @__userId_0
+ORDER BY [b].[CreatedDate] DESC, [b].[Id], [c].[Id], [t].[Id], [t].[Id0], [t0].[Id], [t0].[Id0]
+2026-10-18 17:40:23.075 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.BookingWithDetailDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:23.079 +07:00 [INF] Executed action WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV) in 68.5688ms
+2026-10-18 17:40:23.081 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:23.082 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - 200 null application/json; charset=utf-8 86.53ms
+2026-10-18 17:40:23.094 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/Payments/bank-transfer-info/12 - null null
+2026-10-18 17:40:23.099 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.PaymentsController.BankTransferInfo (WebAPI-DAV)'
+2026-10-18 17:40:23.102 +07:00 [INF] Route matched with {action = "BankTransferInfo", controller = "Payments"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult BankTransferInfo(Int32) on controller WebAPI_DAV.Controllers.PaymentsController (WebAPI-DAV).
+2026-10-18 17:40:23.130 +07:00 [INF] Executed DbCommand (7ms) [Parameters=[@__bookingId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [b].[Id], [b].[BookingCode], [b].[CancelReason], [b].[CancellationFee], [b].[CancelledDate], [b].[CheckInDate], [b].[CheckOutDate], [b].[CreatedDate], [b].[CustomerID], [b].[DepositAmount], [b].[IsDepositPaid], [b].[Note], [b].[RefundAccountName], [b].[RefundAccountNumber], [b].[RefundAmount], [b].[RefundBankCode], [b].[RefundNote], [b].[RefundStatus], [b].[RefundedDate], [b].[RoomChangeDiscount], [b].[Status], [b].[TotalPrice], [c].[Id], [c].[Address], [c].[Email], [c].[FullName], [c].[IdentityCard], [c].[Phone], [c].[UserId]
+FROM [Bookings] AS [b]
+INNER JOIN [Customers] AS [c] ON [b].[CustomerID] = [c].[Id]
+WHERE [b].[Id] = @__bookingId_0
+2026-10-18 17:40:23.138 +07:00 [INF] Executing OkObjectResult, writing value of type 'WebAPI_DAV.Models.DTO.BankTransferInfoDTO'.
+2026-10-18 17:40:23.142 +07:00 [INF] Executed action WebAPI_DAV.Controllers.PaymentsController.BankTransferInfo (WebAPI-DAV) in 37.1253ms
+2026-10-18 17:40:23.143 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.PaymentsController.BankTransferInfo (WebAPI-DAV)'
+2026-10-18 17:40:23.145 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/Payments/bank-transfer-info/12 - 200 null application/json; charset=utf-8 51.0469ms
+2026-10-18 17:40:23.202 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - null null
+2026-10-18 17:40:23.206 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:23.208 +07:00 [INF] Route matched with {action = "GetMyBookings", controller = "Bookings"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetMyBookings() on controller WebAPI_DAV.Controllers.BookingsController (WebAPI-DAV).
+2026-10-18 17:40:23.220 +07:00 [INF] Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[BookingCode], [b].[CheckInDate], [b].[CheckOutDate], [b].[Status], [b].[TotalPrice], [b].[DepositAmount], [b].[IsDepositPaid], [b].[CreatedDate], [b].[Note], [b].[CustomerID], [c].[FullName], [c].[Phone], [c].[Id], [t].[RoomNumber], [t].[Id], [t].[Id0], [t0].[RoomId], [t0].[RoomNumber], [t0].[RoomTypeName], [t0].[BasePrice], [t0].[Id], [t0].[Id0], [t0].[Id1], [b].[CancelledDate], [b].[CancelReason], [b].[CancellationFee], [b].[RefundAmount], [b].[RefundStatus], [b].[RefundBankCode], [b].[RefundAccountNumber], [b].[RefundAccountName], [b].[RefundedDate], [b].[RefundNote], [b].[RoomChangeDiscount]
+FROM [Bookings] AS [b]
+INNER JOIN [Customers] AS [c] ON [b].[CustomerID] = [c].[Id]
+LEFT JOIN (
+    SELECT [r].[RoomNumber], [b0].[Id], [r].[Id] AS [Id0], [b0].[BookingId]
+    FROM [BookingRooms] AS [b0]
+    INNER JOIN [Rooms] AS [r] ON [b0].[RoomId] = [r].[Id]
+) AS [t] ON [b].[Id] = [t].[BookingId]
+LEFT JOIN (
+    SELECT [b1].[RoomId], [r0].[RoomNumber], [r1].[Name] AS [RoomTypeName], [r1].[BasePrice], [b1].[Id], [r0].[Id] AS [Id0], [r1].[Id] AS [Id1], [b1].[BookingId]
+    FROM [BookingRooms] AS [b1]
+    INNER JOIN [Rooms] AS [r0] ON [b1].[RoomId] = [r0].[Id]
+    INNER JOIN [RoomTypes] AS [r1] ON [r0].[RoomTypeId] = [r1].[Id]
+) AS [t0] ON [b].[Id] = [t0].[BookingId]
+WHERE [c].[UserId] = @__userId_0
+ORDER BY [b].[CreatedDate] DESC, [b].[Id], [c].[Id], [t].[Id], [t].[Id0], [t0].[Id], [t0].[Id0]
+2026-10-18 17:40:23.225 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.BookingWithDetailDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:23.227 +07:00 [INF] Executed action WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV) in 15.9404ms
+2026-10-18 17:40:23.230 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:23.232 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - 200 null application/json; charset=utf-8 29.4339ms
+2026-10-18 17:40:27.255 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - null null
+2026-10-18 17:40:27.259 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:27.261 +07:00 [INF] Route matched with {action = "GetMyBookings", controller = "Bookings"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetMyBookings() on controller WebAPI_DAV.Controllers.BookingsController (WebAPI-DAV).
+2026-10-18 17:40:27.270 +07:00 [INF] Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[BookingCode], [b].[CheckInDate], [b].[CheckOutDate], [b].[Status], [b].[TotalPrice], [b].[DepositAmount], [b].[IsDepositPaid], [b].[CreatedDate], [b].[Note], [b].[CustomerID], [c].[FullName], [c].[Phone], [c].[Id], [t].[RoomNumber], [t].[Id], [t].[Id0], [t0].[RoomId], [t0].[RoomNumber], [t0].[RoomTypeName], [t0].[BasePrice], [t0].[Id], [t0].[Id0], [t0].[Id1], [b].[CancelledDate], [b].[CancelReason], [b].[CancellationFee], [b].[RefundAmount], [b].[RefundStatus], [b].[RefundBankCode], [b].[RefundAccountNumber], [b].[RefundAccountName], [b].[RefundedDate], [b].[RefundNote], [b].[RoomChangeDiscount]
+FROM [Bookings] AS [b]
+INNER JOIN [Customers] AS [c] ON [b].[CustomerID] = [c].[Id]
+LEFT JOIN (
+    SELECT [r].[RoomNumber], [b0].[Id], [r].[Id] AS [Id0], [b0].[BookingId]
+    FROM [BookingRooms] AS [b0]
+    INNER JOIN [Rooms] AS [r] ON [b0].[RoomId] = [r].[Id]
+) AS [t] ON [b].[Id] = [t].[BookingId]
+LEFT JOIN (
+    SELECT [b1].[RoomId], [r0].[RoomNumber], [r1].[Name] AS [RoomTypeName], [r1].[BasePrice], [b1].[Id], [r0].[Id] AS [Id0], [r1].[Id] AS [Id1], [b1].[BookingId]
+    FROM [BookingRooms] AS [b1]
+    INNER JOIN [Rooms] AS [r0] ON [b1].[RoomId] = [r0].[Id]
+    INNER JOIN [RoomTypes] AS [r1] ON [r0].[RoomTypeId] = [r1].[Id]
+) AS [t0] ON [b].[Id] = [t0].[BookingId]
+WHERE [c].[UserId] = @__userId_0
+ORDER BY [b].[CreatedDate] DESC, [b].[Id], [c].[Id], [t].[Id], [t].[Id0], [t0].[Id], [t0].[Id0]
+2026-10-18 17:40:27.274 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.BookingWithDetailDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:27.276 +07:00 [INF] Executed action WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV) in 12.77ms
+2026-10-18 17:40:27.278 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:27.280 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - 200 null application/json; charset=utf-8 25.2227ms
+2026-10-18 17:40:31.304 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - null null
+2026-10-18 17:40:31.309 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:31.311 +07:00 [INF] Route matched with {action = "GetMyBookings", controller = "Bookings"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetMyBookings() on controller WebAPI_DAV.Controllers.BookingsController (WebAPI-DAV).
+2026-10-18 17:40:31.320 +07:00 [INF] Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[BookingCode], [b].[CheckInDate], [b].[CheckOutDate], [b].[Status], [b].[TotalPrice], [b].[DepositAmount], [b].[IsDepositPaid], [b].[CreatedDate], [b].[Note], [b].[CustomerID], [c].[FullName], [c].[Phone], [c].[Id], [t].[RoomNumber], [t].[Id], [t].[Id0], [t0].[RoomId], [t0].[RoomNumber], [t0].[RoomTypeName], [t0].[BasePrice], [t0].[Id], [t0].[Id0], [t0].[Id1], [b].[CancelledDate], [b].[CancelReason], [b].[CancellationFee], [b].[RefundAmount], [b].[RefundStatus], [b].[RefundBankCode], [b].[RefundAccountNumber], [b].[RefundAccountName], [b].[RefundedDate], [b].[RefundNote], [b].[RoomChangeDiscount]
+FROM [Bookings] AS [b]
+INNER JOIN [Customers] AS [c] ON [b].[CustomerID] = [c].[Id]
+LEFT JOIN (
+    SELECT [r].[RoomNumber], [b0].[Id], [r].[Id] AS [Id0], [b0].[BookingId]
+    FROM [BookingRooms] AS [b0]
+    INNER JOIN [Rooms] AS [r] ON [b0].[RoomId] = [r].[Id]
+) AS [t] ON [b].[Id] = [t].[BookingId]
+LEFT JOIN (
+    SELECT [b1].[RoomId], [r0].[RoomNumber], [r1].[Name] AS [RoomTypeName], [r1].[BasePrice], [b1].[Id], [r0].[Id] AS [Id0], [r1].[Id] AS [Id1], [b1].[BookingId]
+    FROM [BookingRooms] AS [b1]
+    INNER JOIN [Rooms] AS [r0] ON [b1].[RoomId] = [r0].[Id]
+    INNER JOIN [RoomTypes] AS [r1] ON [r0].[RoomTypeId] = [r1].[Id]
+) AS [t0] ON [b].[Id] = [t0].[BookingId]
+WHERE [c].[UserId] = @__userId_0
+ORDER BY [b].[CreatedDate] DESC, [b].[Id], [c].[Id], [t].[Id], [t].[Id0], [t0].[Id], [t0].[Id0]
+2026-10-18 17:40:31.324 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.BookingWithDetailDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:31.326 +07:00 [INF] Executed action WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV) in 12.3473ms
+2026-10-18 17:40:31.328 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:31.330 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - 200 null application/json; charset=utf-8 25.7499ms
+2026-10-18 17:40:35.351 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - null null
+2026-10-18 17:40:35.356 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:35.357 +07:00 [INF] Route matched with {action = "GetMyBookings", controller = "Bookings"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetMyBookings() on controller WebAPI_DAV.Controllers.BookingsController (WebAPI-DAV).
+2026-10-18 17:40:35.366 +07:00 [INF] Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[BookingCode], [b].[CheckInDate], [b].[CheckOutDate], [b].[Status], [b].[TotalPrice], [b].[DepositAmount], [b].[IsDepositPaid], [b].[CreatedDate], [b].[Note], [b].[CustomerID], [c].[FullName], [c].[Phone], [c].[Id], [t].[RoomNumber], [t].[Id], [t].[Id0], [t0].[RoomId], [t0].[RoomNumber], [t0].[RoomTypeName], [t0].[BasePrice], [t0].[Id], [t0].[Id0], [t0].[Id1], [b].[CancelledDate], [b].[CancelReason], [b].[CancellationFee], [b].[RefundAmount], [b].[RefundStatus], [b].[RefundBankCode], [b].[RefundAccountNumber], [b].[RefundAccountName], [b].[RefundedDate], [b].[RefundNote], [b].[RoomChangeDiscount]
+FROM [Bookings] AS [b]
+INNER JOIN [Customers] AS [c] ON [b].[CustomerID] = [c].[Id]
+LEFT JOIN (
+    SELECT [r].[RoomNumber], [b0].[Id], [r].[Id] AS [Id0], [b0].[BookingId]
+    FROM [BookingRooms] AS [b0]
+    INNER JOIN [Rooms] AS [r] ON [b0].[RoomId] = [r].[Id]
+) AS [t] ON [b].[Id] = [t].[BookingId]
+LEFT JOIN (
+    SELECT [b1].[RoomId], [r0].[RoomNumber], [r1].[Name] AS [RoomTypeName], [r1].[BasePrice], [b1].[Id], [r0].[Id] AS [Id0], [r1].[Id] AS [Id1], [b1].[BookingId]
+    FROM [BookingRooms] AS [b1]
+    INNER JOIN [Rooms] AS [r0] ON [b1].[RoomId] = [r0].[Id]
+    INNER JOIN [RoomTypes] AS [r1] ON [r0].[RoomTypeId] = [r1].[Id]
+) AS [t0] ON [b].[Id] = [t0].[BookingId]
+WHERE [c].[UserId] = @__userId_0
+ORDER BY [b].[CreatedDate] DESC, [b].[Id], [c].[Id], [t].[Id], [t].[Id0], [t0].[Id], [t0].[Id0]
+2026-10-18 17:40:35.370 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.BookingWithDetailDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:35.372 +07:00 [INF] Executed action WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV) in 13.0032ms
+2026-10-18 17:40:35.374 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:35.376 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - 200 null application/json; charset=utf-8 25.3586ms
+2026-10-18 17:40:39.403 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - null null
+2026-10-18 17:40:39.407 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:39.409 +07:00 [INF] Route matched with {action = "GetMyBookings", controller = "Bookings"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetMyBookings() on controller WebAPI_DAV.Controllers.BookingsController (WebAPI-DAV).
+2026-10-18 17:40:39.420 +07:00 [INF] Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[BookingCode], [b].[CheckInDate], [b].[CheckOutDate], [b].[Status], [b].[TotalPrice], [b].[DepositAmount], [b].[IsDepositPaid], [b].[CreatedDate], [b].[Note], [b].[CustomerID], [c].[FullName], [c].[Phone], [c].[Id], [t].[RoomNumber], [t].[Id], [t].[Id0], [t0].[RoomId], [t0].[RoomNumber], [t0].[RoomTypeName], [t0].[BasePrice], [t0].[Id], [t0].[Id0], [t0].[Id1], [b].[CancelledDate], [b].[CancelReason], [b].[CancellationFee], [b].[RefundAmount], [b].[RefundStatus], [b].[RefundBankCode], [b].[RefundAccountNumber], [b].[RefundAccountName], [b].[RefundedDate], [b].[RefundNote], [b].[RoomChangeDiscount]
+FROM [Bookings] AS [b]
+INNER JOIN [Customers] AS [c] ON [b].[CustomerID] = [c].[Id]
+LEFT JOIN (
+    SELECT [r].[RoomNumber], [b0].[Id], [r].[Id] AS [Id0], [b0].[BookingId]
+    FROM [BookingRooms] AS [b0]
+    INNER JOIN [Rooms] AS [r] ON [b0].[RoomId] = [r].[Id]
+) AS [t] ON [b].[Id] = [t].[BookingId]
+LEFT JOIN (
+    SELECT [b1].[RoomId], [r0].[RoomNumber], [r1].[Name] AS [RoomTypeName], [r1].[BasePrice], [b1].[Id], [r0].[Id] AS [Id0], [r1].[Id] AS [Id1], [b1].[BookingId]
+    FROM [BookingRooms] AS [b1]
+    INNER JOIN [Rooms] AS [r0] ON [b1].[RoomId] = [r0].[Id]
+    INNER JOIN [RoomTypes] AS [r1] ON [r0].[RoomTypeId] = [r1].[Id]
+) AS [t0] ON [b].[Id] = [t0].[BookingId]
+WHERE [c].[UserId] = @__userId_0
+ORDER BY [b].[CreatedDate] DESC, [b].[Id], [c].[Id], [t].[Id], [t].[Id0], [t0].[Id], [t0].[Id0]
+2026-10-18 17:40:39.423 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.BookingWithDetailDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:39.426 +07:00 [INF] Executed action WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV) in 13.9227ms
+2026-10-18 17:40:39.428 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:39.429 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - 200 null application/json; charset=utf-8 26.3151ms
+2026-10-18 17:40:43.445 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - null null
+2026-10-18 17:40:43.451 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:43.453 +07:00 [INF] Route matched with {action = "GetMyBookings", controller = "Bookings"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetMyBookings() on controller WebAPI_DAV.Controllers.BookingsController (WebAPI-DAV).
+2026-10-18 17:40:43.465 +07:00 [INF] Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[BookingCode], [b].[CheckInDate], [b].[CheckOutDate], [b].[Status], [b].[TotalPrice], [b].[DepositAmount], [b].[IsDepositPaid], [b].[CreatedDate], [b].[Note], [b].[CustomerID], [c].[FullName], [c].[Phone], [c].[Id], [t].[RoomNumber], [t].[Id], [t].[Id0], [t0].[RoomId], [t0].[RoomNumber], [t0].[RoomTypeName], [t0].[BasePrice], [t0].[Id], [t0].[Id0], [t0].[Id1], [b].[CancelledDate], [b].[CancelReason], [b].[CancellationFee], [b].[RefundAmount], [b].[RefundStatus], [b].[RefundBankCode], [b].[RefundAccountNumber], [b].[RefundAccountName], [b].[RefundedDate], [b].[RefundNote], [b].[RoomChangeDiscount]
+FROM [Bookings] AS [b]
+INNER JOIN [Customers] AS [c] ON [b].[CustomerID] = [c].[Id]
+LEFT JOIN (
+    SELECT [r].[RoomNumber], [b0].[Id], [r].[Id] AS [Id0], [b0].[BookingId]
+    FROM [BookingRooms] AS [b0]
+    INNER JOIN [Rooms] AS [r] ON [b0].[RoomId] = [r].[Id]
+) AS [t] ON [b].[Id] = [t].[BookingId]
+LEFT JOIN (
+    SELECT [b1].[RoomId], [r0].[RoomNumber], [r1].[Name] AS [RoomTypeName], [r1].[BasePrice], [b1].[Id], [r0].[Id] AS [Id0], [r1].[Id] AS [Id1], [b1].[BookingId]
+    FROM [BookingRooms] AS [b1]
+    INNER JOIN [Rooms] AS [r0] ON [b1].[RoomId] = [r0].[Id]
+    INNER JOIN [RoomTypes] AS [r1] ON [r0].[RoomTypeId] = [r1].[Id]
+) AS [t0] ON [b].[Id] = [t0].[BookingId]
+WHERE [c].[UserId] = @__userId_0
+ORDER BY [b].[CreatedDate] DESC, [b].[Id], [c].[Id], [t].[Id], [t].[Id0], [t0].[Id], [t0].[Id0]
+2026-10-18 17:40:43.469 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.BookingWithDetailDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:43.472 +07:00 [INF] Executed action WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV) in 14.8699ms
+2026-10-18 17:40:43.474 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:43.476 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - 200 null application/json; charset=utf-8 30.1978ms
+2026-10-18 17:40:47.497 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - null null
+2026-10-18 17:40:47.502 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:47.503 +07:00 [INF] Route matched with {action = "GetMyBookings", controller = "Bookings"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetMyBookings() on controller WebAPI_DAV.Controllers.BookingsController (WebAPI-DAV).
+2026-10-18 17:40:47.514 +07:00 [INF] Executed DbCommand (2ms) [Parameters=[@__userId_0='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[BookingCode], [b].[CheckInDate], [b].[CheckOutDate], [b].[Status], [b].[TotalPrice], [b].[DepositAmount], [b].[IsDepositPaid], [b].[CreatedDate], [b].[Note], [b].[CustomerID], [c].[FullName], [c].[Phone], [c].[Id], [t].[RoomNumber], [t].[Id], [t].[Id0], [t0].[RoomId], [t0].[RoomNumber], [t0].[RoomTypeName], [t0].[BasePrice], [t0].[Id], [t0].[Id0], [t0].[Id1], [b].[CancelledDate], [b].[CancelReason], [b].[CancellationFee], [b].[RefundAmount], [b].[RefundStatus], [b].[RefundBankCode], [b].[RefundAccountNumber], [b].[RefundAccountName], [b].[RefundedDate], [b].[RefundNote], [b].[RoomChangeDiscount]
+FROM [Bookings] AS [b]
+INNER JOIN [Customers] AS [c] ON [b].[CustomerID] = [c].[Id]
+LEFT JOIN (
+    SELECT [r].[RoomNumber], [b0].[Id], [r].[Id] AS [Id0], [b0].[BookingId]
+    FROM [BookingRooms] AS [b0]
+    INNER JOIN [Rooms] AS [r] ON [b0].[RoomId] = [r].[Id]
+) AS [t] ON [b].[Id] = [t].[BookingId]
+LEFT JOIN (
+    SELECT [b1].[RoomId], [r0].[RoomNumber], [r1].[Name] AS [RoomTypeName], [r1].[BasePrice], [b1].[Id], [r0].[Id] AS [Id0], [r1].[Id] AS [Id1], [b1].[BookingId]
+    FROM [BookingRooms] AS [b1]
+    INNER JOIN [Rooms] AS [r0] ON [b1].[RoomId] = [r0].[Id]
+    INNER JOIN [RoomTypes] AS [r1] ON [r0].[RoomTypeId] = [r1].[Id]
+) AS [t0] ON [b].[Id] = [t0].[BookingId]
+WHERE [c].[UserId] = @__userId_0
+ORDER BY [b].[CreatedDate] DESC, [b].[Id], [c].[Id], [t].[Id], [t].[Id0], [t0].[Id], [t0].[Id0]
+2026-10-18 17:40:47.518 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.BookingWithDetailDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:47.521 +07:00 [INF] Executed action WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV) in 15.358ms
+2026-10-18 17:40:47.523 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:47.525 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - 200 null application/json; charset=utf-8 28.3055ms
+2026-10-18 17:40:51.537 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - null null
+2026-10-18 17:40:51.542 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:51.543 +07:00 [INF] Route matched with {action = "GetMyBookings", controller = "Bookings"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetMyBookings() on controller WebAPI_DAV.Controllers.BookingsController (WebAPI-DAV).
+2026-10-18 17:40:51.554 +07:00 [INF] Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[BookingCode], [b].[CheckInDate], [b].[CheckOutDate], [b].[Status], [b].[TotalPrice], [b].[DepositAmount], [b].[IsDepositPaid], [b].[CreatedDate], [b].[Note], [b].[CustomerID], [c].[FullName], [c].[Phone], [c].[Id], [t].[RoomNumber], [t].[Id], [t].[Id0], [t0].[RoomId], [t0].[RoomNumber], [t0].[RoomTypeName], [t0].[BasePrice], [t0].[Id], [t0].[Id0], [t0].[Id1], [b].[CancelledDate], [b].[CancelReason], [b].[CancellationFee], [b].[RefundAmount], [b].[RefundStatus], [b].[RefundBankCode], [b].[RefundAccountNumber], [b].[RefundAccountName], [b].[RefundedDate], [b].[RefundNote], [b].[RoomChangeDiscount]
+FROM [Bookings] AS [b]
+INNER JOIN [Customers] AS [c] ON [b].[CustomerID] = [c].[Id]
+LEFT JOIN (
+    SELECT [r].[RoomNumber], [b0].[Id], [r].[Id] AS [Id0], [b0].[BookingId]
+    FROM [BookingRooms] AS [b0]
+    INNER JOIN [Rooms] AS [r] ON [b0].[RoomId] = [r].[Id]
+) AS [t] ON [b].[Id] = [t].[BookingId]
+LEFT JOIN (
+    SELECT [b1].[RoomId], [r0].[RoomNumber], [r1].[Name] AS [RoomTypeName], [r1].[BasePrice], [b1].[Id], [r0].[Id] AS [Id0], [r1].[Id] AS [Id1], [b1].[BookingId]
+    FROM [BookingRooms] AS [b1]
+    INNER JOIN [Rooms] AS [r0] ON [b1].[RoomId] = [r0].[Id]
+    INNER JOIN [RoomTypes] AS [r1] ON [r0].[RoomTypeId] = [r1].[Id]
+) AS [t0] ON [b].[Id] = [t0].[BookingId]
+WHERE [c].[UserId] = @__userId_0
+ORDER BY [b].[CreatedDate] DESC, [b].[Id], [c].[Id], [t].[Id], [t].[Id0], [t0].[Id], [t0].[Id0]
+2026-10-18 17:40:51.558 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.BookingWithDetailDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:51.560 +07:00 [INF] Executed action WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV) in 14.5658ms
+2026-10-18 17:40:51.562 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:51.564 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - 200 null application/json; charset=utf-8 26.5871ms
+2026-10-18 17:40:55.583 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - null null
+2026-10-18 17:40:55.587 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:55.589 +07:00 [INF] Route matched with {action = "GetMyBookings", controller = "Bookings"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetMyBookings() on controller WebAPI_DAV.Controllers.BookingsController (WebAPI-DAV).
+2026-10-18 17:40:55.599 +07:00 [INF] Executed DbCommand (2ms) [Parameters=[@__userId_0='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[BookingCode], [b].[CheckInDate], [b].[CheckOutDate], [b].[Status], [b].[TotalPrice], [b].[DepositAmount], [b].[IsDepositPaid], [b].[CreatedDate], [b].[Note], [b].[CustomerID], [c].[FullName], [c].[Phone], [c].[Id], [t].[RoomNumber], [t].[Id], [t].[Id0], [t0].[RoomId], [t0].[RoomNumber], [t0].[RoomTypeName], [t0].[BasePrice], [t0].[Id], [t0].[Id0], [t0].[Id1], [b].[CancelledDate], [b].[CancelReason], [b].[CancellationFee], [b].[RefundAmount], [b].[RefundStatus], [b].[RefundBankCode], [b].[RefundAccountNumber], [b].[RefundAccountName], [b].[RefundedDate], [b].[RefundNote], [b].[RoomChangeDiscount]
+FROM [Bookings] AS [b]
+INNER JOIN [Customers] AS [c] ON [b].[CustomerID] = [c].[Id]
+LEFT JOIN (
+    SELECT [r].[RoomNumber], [b0].[Id], [r].[Id] AS [Id0], [b0].[BookingId]
+    FROM [BookingRooms] AS [b0]
+    INNER JOIN [Rooms] AS [r] ON [b0].[RoomId] = [r].[Id]
+) AS [t] ON [b].[Id] = [t].[BookingId]
+LEFT JOIN (
+    SELECT [b1].[RoomId], [r0].[RoomNumber], [r1].[Name] AS [RoomTypeName], [r1].[BasePrice], [b1].[Id], [r0].[Id] AS [Id0], [r1].[Id] AS [Id1], [b1].[BookingId]
+    FROM [BookingRooms] AS [b1]
+    INNER JOIN [Rooms] AS [r0] ON [b1].[RoomId] = [r0].[Id]
+    INNER JOIN [RoomTypes] AS [r1] ON [r0].[RoomTypeId] = [r1].[Id]
+) AS [t0] ON [b].[Id] = [t0].[BookingId]
+WHERE [c].[UserId] = @__userId_0
+ORDER BY [b].[CreatedDate] DESC, [b].[Id], [c].[Id], [t].[Id], [t].[Id0], [t0].[Id], [t0].[Id0]
+2026-10-18 17:40:55.603 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.BookingWithDetailDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:55.606 +07:00 [INF] Executed action WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV) in 14.1921ms
+2026-10-18 17:40:55.607 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:55.609 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - 200 null application/json; charset=utf-8 26.5917ms
+2026-10-18 17:40:59.621 +07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - null null
+2026-10-18 17:40:59.626 +07:00 [INF] Executing endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:59.628 +07:00 [INF] Route matched with {action = "GetMyBookings", controller = "Bookings"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetMyBookings() on controller WebAPI_DAV.Controllers.BookingsController (WebAPI-DAV).
+2026-10-18 17:40:59.637 +07:00 [INF] Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [b].[Id], [b].[BookingCode], [b].[CheckInDate], [b].[CheckOutDate], [b].[Status], [b].[TotalPrice], [b].[DepositAmount], [b].[IsDepositPaid], [b].[CreatedDate], [b].[Note], [b].[CustomerID], [c].[FullName], [c].[Phone], [c].[Id], [t].[RoomNumber], [t].[Id], [t].[Id0], [t0].[RoomId], [t0].[RoomNumber], [t0].[RoomTypeName], [t0].[BasePrice], [t0].[Id], [t0].[Id0], [t0].[Id1], [b].[CancelledDate], [b].[CancelReason], [b].[CancellationFee], [b].[RefundAmount], [b].[RefundStatus], [b].[RefundBankCode], [b].[RefundAccountNumber], [b].[RefundAccountName], [b].[RefundedDate], [b].[RefundNote], [b].[RoomChangeDiscount]
+FROM [Bookings] AS [b]
+INNER JOIN [Customers] AS [c] ON [b].[CustomerID] = [c].[Id]
+LEFT JOIN (
+    SELECT [r].[RoomNumber], [b0].[Id], [r].[Id] AS [Id0], [b0].[BookingId]
+    FROM [BookingRooms] AS [b0]
+    INNER JOIN [Rooms] AS [r] ON [b0].[RoomId] = [r].[Id]
+) AS [t] ON [b].[Id] = [t].[BookingId]
+LEFT JOIN (
+    SELECT [b1].[RoomId], [r0].[RoomNumber], [r1].[Name] AS [RoomTypeName], [r1].[BasePrice], [b1].[Id], [r0].[Id] AS [Id0], [r1].[Id] AS [Id1], [b1].[BookingId]
+    FROM [BookingRooms] AS [b1]
+    INNER JOIN [Rooms] AS [r0] ON [b1].[RoomId] = [r0].[Id]
+    INNER JOIN [RoomTypes] AS [r1] ON [r0].[RoomTypeId] = [r1].[Id]
+) AS [t0] ON [b].[Id] = [t0].[BookingId]
+WHERE [c].[UserId] = @__userId_0
+ORDER BY [b].[CreatedDate] DESC, [b].[Id], [c].[Id], [t].[Id], [t].[Id0], [t0].[Id], [t0].[Id0]
+2026-10-18 17:40:59.641 +07:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[WebAPI_DAV.Models.DTO.BookingWithDetailDTO, WebAPI-DAV, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-10-18 17:40:59.644 +07:00 [INF] Executed action WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV) in 13.6357ms
+2026-10-18 17:40:59.646 +07:00 [INF] Executed endpoint 'WebAPI_DAV.Controllers.BookingsController.GetMyBookings (WebAPI-DAV)'
+2026-10-18 17:40:59.648 +07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7167/api/Bookings/my-bookings - 200 null application/json; charset=utf-8 26.4604ms

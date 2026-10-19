@@ -1,0 +1,47 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<RoomLiveDTO>
+@{
+    Layout = "_AdminLayout";
+    var needCleaning = ViewBag.NeedCleaning as List<string> ?? new();
+}
+<div class="stat-grid">
+    <div class="stat-box" style="--accent:#fcf0dc"><div class="label">Cần dọn hôm nay</div><div class="value">@needCleaning.Count</div><div class="hint">Phòng vừa trả</div></div>
+    <div class="stat-box"><div class="label">Đang bảo trì</div><div class="value">@Model.Count(r => r.LiveStatus == "Maintenance")</div></div>
+    <div class="stat-box" style="--accent:#e4f4ea"><div class="label">Sẵn sàng</div><div class="value">@Model.Count(r => r.LiveStatus == "Available")</div></div>
+</div>
+
+<div class="card">
+    <h3>Trạng thái phòng <small>Đưa phòng vào bảo trì sẽ ẩn khỏi kết quả tìm phòng của khách · Phòng đang có khách ở bị khóa, muốn sửa phòng hãy chuyển khách sang phòng khác trước</small></h3>
+    <table class="admin-table">
+        <tr><th>Phòng</th><th>Loại</th><th>Tầng</th><th>Hiện tại</th><th>Ghi chú</th><th>Thao tác</th></tr>
+        @foreach (var r in Model)
+        {
+            <tr>
+                <td class="code">@r.RoomNumber</td>
+                <td>@r.RoomTypeName</td>
+                <td>@r.Floor</td>
+                <td><span class="pill pill-@r.LiveStatus">@RoleHelper.StatusLabel(r.LiveStatus)</span></td>
+                <td>
+                    @if (needCleaning.Contains(r.RoomNumber)) { <span class="pill pill-Pending">Cần dọn dẹp</span> }
+                    @if (r.GuestName != null) { <span class="muted">@r.GuestName</span> }
+                </td>
+                <td>
+                    @if (r.HasGuest)
+                    {
+                        <span class="muted" title="Phòng có khách lưu trú không được đổi trạng thái dọn dẹp / bảo trì">🔒 Đang có khách</span>
+                    }
+                    else
+                    {
+                        <form asp-action="ToggleMaintenance" method="post">
+                            <input type="hidden" name="roomId" value="@r.Id" />
+                            <button type="submit" class="btn @(r.RoomStatus == "Maintenance" ? "btn-green" : "btn-gray")">
+                                @(r.RoomStatus == "Maintenance" ? "Hoàn tất — sẵn sàng" : "Đưa vào bảo trì")
+                            </button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+</div>

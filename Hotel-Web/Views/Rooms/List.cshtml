@@ -1,0 +1,62 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<RoomAvailableDTO>
+@{
+    ViewData["Title"] = "Phòng nghỉ";
+    ViewData["TransparentHeader"] = true;
+    bool isSearch = ViewBag.IsSearchResult == true;
+    string? hero = ViewBag.HeroImage;
+    var types = ViewBag.Types as List<string> ?? new();
+    string? selType = ViewBag.SelectedType;
+}
+
+<section class="page-hero">
+    <div class="hero-bg" style="@(string.IsNullOrEmpty(hero) ? "" : $"background-image:url('{hero}')")"></div>
+    <div class="hero-inner">
+        <div class="eyebrow">Phòng nghỉ &amp; Suites</div>
+        <h1>@(isSearch ? "Phòng còn trống" : "Chọn không gian của bạn")</h1>
+        <p>@(isSearch ? $"Từ {DateTime.Parse((string)ViewBag.CheckIn):dd/MM/yyyy} đến {DateTime.Parse((string)ViewBag.CheckOut):dd/MM/yyyy}" : "Mỗi căn phòng là một chốn riêng tư — chọn ngày để xem phòng còn trống và giá trọn kỳ nghỉ")</p>
+    </div>
+</section>
+
+<partial name="_BookingBar" />
+
+<section class="rooms-sec container" id="rooms">
+    <div class="sec-head reveal">
+        <div class="eyebrow">@(isSearch ? "Kết quả tìm kiếm" : "Tất cả phòng")</div>
+        <h2>@(isSearch ? $"{Model.Count} phòng sẵn sàng cho bạn" : "Phòng & Suites tại DAV Hotel")</h2>
+    </div>
+
+    @if (!isSearch && types.Count > 1)
+    {
+        <div class="chips reveal">
+            <a class="@(string.IsNullOrEmpty(selType) ? "on" : "")" href="/Rooms/List#rooms">Tất cả</a>
+            @foreach (var t in types) { <a class="@(selType == t ? "on" : "")" href="/Rooms/List?type=@Uri.EscapeDataString(t)#rooms">@t</a> }
+        </div>
+    }
+    @if (isSearch)
+    {
+        <div class="chips reveal"><a href="/Rooms/List">← Xem tất cả phòng</a></div>
+    }
+
+    @if (ViewBag.Error != null) { <div class="notice">@ViewBag.Error</div> }
+    @if (ViewBag.GuestNotice != null) { <div class="notice">@ViewBag.GuestNotice <a href="/Account/Login?returnUrl=@Uri.EscapeDataString(Context.Request.Path + Context.Request.QueryString)">Đăng nhập</a></div> }
+
+    @if (Model.Any())
+    {
+        <div class="room-grid">
+            @foreach (var room in Model)
+            {
+                <partial name="_RoomCard" model="room" />
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <h3>@(isSearch ? "Rất tiếc, không còn phòng trống" : "Hiện chưa có phòng nào")</h3>
+            <p>Vui lòng chọn khoảng thời gian khác hoặc liên hệ lễ tân để được hỗ trợ.</p>
+            <a class="btn-lux" href="/Rooms/List">Xem tất cả phòng</a>
+        </div>
+    }
+</section>

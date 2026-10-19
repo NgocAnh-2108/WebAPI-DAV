@@ -1,0 +1,25 @@
+﻿@* Thanh chọn ngày lưu trú — dùng chung cho Trang chủ và trang Phòng nghỉ *@
+@{
+    var today = DateTime.Today.ToString("yyyy-MM-dd");
+    var ci = (string?)ViewBag.CheckIn ?? DateTime.Today.AddDays(1).ToString("yyyy-MM-dd");
+    var co = (string?)ViewBag.CheckOut ?? DateTime.Today.AddDays(2).ToString("yyyy-MM-dd");
+}
+<form class="booking-bar" id="book" action="/Rooms/Search" method="get">
+    <div class="cell"><label>Nhận phòng</label><input type="date" name="checkIn" id="ci" value="@ci" min="@today" required /></div>
+    <div class="cell"><label>Trả phòng</label><input type="date" name="checkOut" id="co" value="@co" min="@today" required /></div>
+    <div class="cell"><label>Thời gian lưu trú</label><div class="nights" id="nights">1 đêm</div></div>
+    <button type="submit">Kiểm tra phòng trống</button>
+</form>
+<script>
+    (function () {
+        var ci = document.getElementById('ci'), co = document.getElementById('co'), n = document.getElementById('nights');
+        function upd() {
+            var a = new Date(ci.value), b = new Date(co.value);
+            var d = Math.round((b - a) / 86400000);
+            n.textContent = d > 0 ? d + ' đêm' : '—';
+            co.min = ci.value;
+        }
+        ci.addEventListener('change', function () { if (co.value <= ci.value) { var d = new Date(ci.value); d.setDate(d.getDate() + 1); co.value = d.toISOString().slice(0, 10); } upd(); });
+        co.addEventListener('change', upd); upd();
+    })();
+</script>

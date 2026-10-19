@@ -1,0 +1,44 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<StaffAccountDTO>
+@{
+    Layout = "_AdminLayout";
+}
+<div class="grid-3">
+    <div class="card">
+        <h3>Nhân viên <small>@Model.Count người</small></h3>
+        <table class="admin-table">
+            <tr><th>Email</th><th>Vai trò</th><th></th></tr>
+            @foreach (var s in Model.OrderBy(s => s.RoleName))
+            {
+                <tr>
+                    <td><b>@s.Email</b></td>
+                    <td><span class="pill pill-@s.RoleName">@RoleHelper.RoleLabel(s.RoleName)</span></td>
+                    <td class="right">
+                        @if (s.CanDelete)
+                        {
+                            <form asp-action="DeleteAccount" method="post" onsubmit="return confirm('Xóa tài khoản nhân viên @s.Email?');">
+                                <input type="hidden" name="id" value="@s.Id" />
+                                <input type="hidden" name="returnTo" value="Staff" />
+                                <button class="btn btn-danger">Xóa</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </table>
+        @if (!Model.Any()) { <p class="empty">Chưa có nhân viên</p> }
+    </div>
+    <div class="card">
+        <h3>Thêm nhân viên</h3>
+        <form asp-action="AddStaff" method="post">
+            <input type="hidden" name="returnTo" value="Staff" />
+            <div style="display:grid;gap:12px">
+                <div><label>Email</label><input type="email" name="Username" required style="width:100%" /></div>
+                <div><label>Mật khẩu</label><input type="text" name="Password" minlength="6" required style="width:100%" /></div>
+                <div><label>Vai trò</label><select name="Roles[0]" style="width:100%"><option value="Receptionist">Lễ tân</option><option value="Manager">Quản lý</option></select></div>
+            </div>
+            <button class="btn btn-gold" style="margin-top:16px">+ Thêm</button>
+        </form>
+    </div>
+</div>

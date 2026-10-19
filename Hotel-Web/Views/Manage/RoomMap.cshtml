@@ -1,0 +1,60 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<RoomLiveDTO>
+@{
+    Layout = "_AdminLayout";
+}
+<style>
+    .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; }
+    .legend span { display: flex; align-items: center; gap: 6px; }
+    .legend i { width: 12px; height: 12px; border-radius: 3px; }
+    .floor { margin-top: 22px; }
+    .floor-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 700; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+    .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+    .tile { border-radius: 14px; padding: 14px; color: #fff; min-height: 108px; display: flex; flex-direction: column; justify-content: space-between;
+            transition: transform .2s, box-shadow .2s; text-decoration: none; }
+    .tile:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,.12); }
+    .tile .no { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 700; line-height: 1; }
+    .tile .type { font-size: 11px; opacity: .85; margin-top: 2px; }
+    .tile .st { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; }
+    .tile .guest { font-size: 12px; opacity: .95; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .t-Available { background: linear-gradient(135deg, #2e8b57, #3aa56b); }
+    .t-Occupied { background: linear-gradient(135deg, #2f6f9f, #3d87bd); }
+    .t-Reserved { background: linear-gradient(135deg, #c27d14, #dc9a2f); }
+    .t-Maintenance { background: linear-gradient(135deg, #6b7778, #8b9798); }
+</style>
+
+<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px">
+        <form class="mg-form" method="get">
+            <div class="field"><label>Xem theo ngày</label><input type="date" name="date" value="@ViewBag.SelectedDate" onchange="this.form.submit()" /></div>
+        </form>
+        <div class="legend">
+            <span><i style="background:#2e8b57"></i>Trống (@Model.Count(r => r.LiveStatus == "Available"))</span>
+            <span><i style="background:#2f6f9f"></i>Có khách (@Model.Count(r => r.LiveStatus == "Occupied"))</span>
+            <span><i style="background:#c27d14"></i>Đặt trước (@Model.Count(r => r.LiveStatus == "Reserved"))</span>
+            <span><i style="background:#6b7778"></i>Bảo trì (@Model.Count(r => r.LiveStatus == "Maintenance"))</span>
+        </div>
+    </div>
+
+    @foreach (var floor in Model.GroupBy(r => r.Floor))
+    {
+        <div class="floor">
+            <div class="floor-title">Tầng @floor.Key</div>
+            <div class="tiles">
+                @foreach (var r in floor)
+                {
+                    var href = r.BookingCode != null ? $"/BookingManage/Index?q={r.BookingCode}" : "#";
+                    <a class="tile t-@r.LiveStatus" href="@href" title="@r.RoomTypeName - @r.BasePrice.ToString("N0") đ/đêm">
+                        <div><div class="no">@r.RoomNumber</div><div class="type">@r.RoomTypeName</div></div>
+                        <div>
+                            @if (r.GuestName != null) { <div class="guest">@r.GuestName</div> }
+                            <div class="st">@RoleHelper.StatusLabel(r.LiveStatus)</div>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    }
+    @if (!Model.Any()) { <p class="empty">Chưa có phòng nào</p> }
+</div>

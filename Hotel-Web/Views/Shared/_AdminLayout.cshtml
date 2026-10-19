@@ -1,0 +1,195 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@{
+    var role = RoleHelper.MainRole(Context.Session);
+    var isManager = role == "Manager";
+    var path = (Context.Request.Path.Value ?? "").ToLower();
+    string A(string p) => path.StartsWith(p.ToLower()) ? "active" : "";
+    var username = Context.Session.GetString("Username") ?? "";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewBag.PageTitle · DAV Hotel Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #1b1712; --ink-2: #2b2420; --gold: #c9a05f; --gold-2: #e8c99b; --cream: #f6f3ee;
+            --muted: #8a7d6e; --line: #ece6dc; --green: #2e8b57; --red: #b93a32; --blue: #2f6f9f; --amber: #d18b1f; --gray: #7f8c8d;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--ink-2); min-height: 100vh; font-size: 14px; }
+        a { color: inherit; }
+
+        /* ===== Sidebar ===== */
+        .sidebar { width: 262px; background: linear-gradient(180deg, #1b1712 0%, #231c16 100%); color: #cfc3b3;
+                   position: fixed; inset: 0 auto 0 0; overflow-y: auto; padding-bottom: 30px; z-index: 50; }
+        .sidebar .logo { padding: 28px 26px 22px; border-bottom: 1px solid #33291f; }
+        .sidebar .logo .name { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 700; color: var(--gold-2); letter-spacing: 3px; }
+        .sidebar .logo .sub { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #8a7d6e; margin-top: 2px; }
+        .sidebar .group { padding: 20px 26px 6px; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #7b6e5f; font-weight: 700; }
+        .sidebar a { display: block; padding: 9px 26px; color: #cfc3b3; text-decoration: none; font-size: 13.5px;
+                     border-left: 3px solid transparent; transition: all .2s; }
+        .sidebar a:hover { background: rgba(232,201,155,.06); color: var(--gold-2); padding-left: 30px; }
+        .sidebar a.active { background: rgba(232,201,155,.1); color: var(--gold-2); border-left-color: var(--gold); font-weight: 600; }
+        .sidebar a .soon { font-size: 9px; background: #3a3027; color: #a89a88; padding: 1px 6px; border-radius: 8px; margin-left: 6px; letter-spacing: .5px; }
+        .sidebar .to-site { margin: 24px 22px 0; display: block; text-align: center; border: 1px solid #4a3d30; border-radius: 10px; padding: 10px; }
+
+        /* ===== Main ===== */
+        .main { margin-left: 262px; padding: 26px 36px 50px; min-height: 100vh; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 26px; gap: 16px; flex-wrap: wrap; }
+        .topbar h1 { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 700; color: var(--ink); }
+        .topbar .date { color: var(--muted); font-size: 13px; margin-top: 2px; }
+        .user-chip { display: flex; align-items: center; gap: 12px; background: #fff; padding: 8px 10px 8px 16px; border-radius: 40px; box-shadow: 0 2px 10px rgba(0,0,0,.04); }
+        .user-chip .who { text-align: right; line-height: 1.25; }
+        .user-chip .who b { font-size: 13px; display: block; }
+        .user-chip .who span { font-size: 11px; color: var(--gold); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .user-chip .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--ink-2); color: var(--gold-2); display: grid; place-items: center; font-weight: 700; }
+        .user-chip a.out { font-size: 12px; color: var(--red); text-decoration: none; font-weight: 600; margin-left: 4px; padding-right: 6px; }
+
+        .alert { padding: 13px 18px; border-radius: 10px; margin-bottom: 20px; font-weight: 500; animation: fade .4s ease; }
+        .alert-success { background: #e9f6ee; color: #1e6b40; border: 1px solid #bfe3cc; }
+        .alert-danger { background: #fbeceb; color: #9e2c25; border: 1px solid #f0c2be; }
+        @@keyframes fade { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+        .card { background: #fff; border-radius: 16px; padding: 22px 24px; margin-bottom: 22px; box-shadow: 0 2px 14px rgba(43,36,32,.05); }
+        .card h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; margin-bottom: 14px; color: var(--ink); display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .card h3 small { font-family: 'Inter'; font-size: 12px; color: var(--muted); font-weight: 500; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+        .grid-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 22px; }
+        @@media (max-width: 1100px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+        table.admin-table { width: 100%; border-collapse: collapse; }
+        .admin-table th, .admin-table td { padding: 11px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+        .admin-table th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+        .admin-table tr:hover td { background: #fcfaf6; }
+        .admin-table img { width: 64px; height: 46px; object-fit: cover; border-radius: 8px; }
+        .code { font-family: ui-monospace, Consolas, monospace; font-weight: 700; color: var(--ink); letter-spacing: .5px; white-space: nowrap; }
+        .right { white-space: nowrap; }
+        .muted { color: var(--muted); }
+        .right { text-align: right; }
+        .empty { color: var(--muted); padding: 26px 0; text-align: center; }
+
+        .btn { padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 12.5px; color: #fff;
+               text-decoration: none; display: inline-block; transition: all .2s; font-family: inherit; }
+        .btn-dark { background: var(--ink-2); } .btn-dark:hover { background: var(--gold); color: var(--ink); }
+        .btn-gold { background: var(--gold); color: var(--ink); } .btn-gold:hover { background: var(--gold-2); }
+        .btn-danger { background: var(--red); } .btn-danger:hover { background: #d44a40; }
+        .btn-green { background: var(--green); } .btn-green:hover { background: #37a066; }
+        .btn-blue { background: var(--blue); } .btn-blue:hover { background: #3b84ba; }
+        .btn-gray { background: #a3978a; } .btn-gray:hover { background: #8a7d6e; }
+        .btn-outline { background: transparent; color: var(--ink-2); border: 1px solid #d9cfbf; } .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+        .actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+        .actions form { display: inline; }
+
+        .pill { padding: 4px 11px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; white-space: nowrap; }
+        .pill-Available, .pill-Confirmed, .pill-Success { background: #e4f4ea; color: var(--green); }
+        .pill-Cancelled, .pill-Failed { background: #f9e3e1; color: var(--red); }
+        .pill-Maintenance, .pill-CheckedOut { background: #eceeee; color: #5f6b6c; }
+        .pill-Pending, .pill-Reserved { background: #fcf0dc; color: #a86b0c; }
+        .pill-CheckedIn, .pill-Occupied { background: #e2eef7; color: var(--blue); }
+        .pill-Manager { background: #2b2420; color: var(--gold-2); } .pill-Receptionist { background: #e2eef7; color: var(--blue); } .pill-Customer { background: #f3ede3; color: #8a6d3b; }
+
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 18px; margin-bottom: 24px; }
+        .stat-box { background: #fff; border-radius: 16px; padding: 20px 22px; box-shadow: 0 2px 14px rgba(43,36,32,.05); position: relative; overflow: hidden; }
+        .stat-box::after { content: ''; position: absolute; right: -24px; top: -24px; width: 80px; height: 80px; border-radius: 50%; background: var(--accent, #f3ede3); opacity: .55; }
+        .stat-box .label { font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
+        .stat-box .value { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 700; color: var(--ink); margin-top: 4px; line-height: 1.1; }
+        .stat-box .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+        .mg-form { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+        .mg-form .field { display: flex; flex-direction: column; min-width: 140px; }
+        .mg-form .field.grow { flex: 1; min-width: 220px; }
+        label { font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; }
+        input, select, textarea { padding: 9px 11px; border: 1px solid #e3dcd0; border-radius: 8px; font-size: 14px; font-family: inherit; background: #fff; color: var(--ink-2); }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,160,95,.15); }
+        .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+        .tabs a { padding: 7px 14px; border-radius: 20px; text-decoration: none; font-size: 12.5px; font-weight: 600; background: #f3ede3; color: #6d5f50; }
+        .tabs a.on { background: var(--ink-2); color: var(--gold-2); }
+        .placeholder-dev { text-align: center; padding: 50px 20px; color: var(--muted); }
+        .placeholder-dev h3 { justify-content: center; }
+        .edit-row { display: none; background: #faf7f2; } .edit-row.show { display: table-row; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="name">DAV</div>
+            <div class="sub">Hotel · @RoleHelper.RoleLabel(role)</div>
+        </div>
+
+        <div class="group">Tổng quan</div>
+        <a class="@A("/Manage/Dashboard")" href="/Manage/Dashboard">Dashboard</a>
+
+        <div class="group">Quản lý phòng</div>
+        <a class="@A("/Manage/RoomMap")" href="/Manage/RoomMap">Sơ đồ phòng</a>
+        @if (isManager)
+        {
+            <a class="@A("/Manage/RoomList")" href="/Manage/RoomList">Danh sách phòng</a>
+            <a class="@A("/Manage/RoomTypes")" href="/Manage/RoomTypes">Phân loại phòng</a>
+        }
+        <a class="@A("/Manage/Housekeeping")" href="/Manage/Housekeeping">Dọn dẹp &amp; Bảo trì</a>
+
+        <div class="group">Quản lý đặt phòng</div>
+        <a class="@A("/BookingManage/NewBooking")" href="/BookingManage/NewBooking">Tạo booking tại quầy</a>
+        <a class="@A("/BookingManage/Calendar")" href="/BookingManage/Calendar">Lịch đặt phòng</a>
+        <a class="@(path == "/bookingmanage" || path.StartsWith("/bookingmanage/index") ? "active" : "")" href="/BookingManage/Index">Danh sách Booking</a>
+        <a class="@A("/BookingManage/CheckIn")" href="/BookingManage/CheckIn">Nhận phòng</a>
+        <a class="@A("/BookingManage/CheckOut")" href="/BookingManage/CheckOut">Trả phòng</a>
+
+        <div class="group">Khách hàng</div>
+        <a class="@A("/CustomerManage")" href="/CustomerManage/Index">Danh sách khách hàng</a>
+
+        <div class="group">Dịch vụ</div>
+        <a class="@A("/ServiceManage/Index")" href="/ServiceManage/Index">Danh sách dịch vụ</a>
+        <a class="@A("/ServiceManage/Usage")" href="/ServiceManage/Usage">Dịch vụ khách sử dụng</a>
+
+        <div class="group">Tài chính</div>
+        @if (isManager)
+        {
+            <a class="@A("/FinanceManage/Payments")" href="/FinanceManage/Payments">Thanh toán</a>
+        }
+        <a class="@A("/FinanceManage/Invoice")" href="/FinanceManage/Invoices">Hóa đơn</a>
+        <a class="@A("/FinanceManage/Refunds")" href="/FinanceManage/Refunds">Hoàn cọc</a>
+        @if (isManager)
+        {
+            <a class="@A("/FinanceManage/Revenue")" href="/FinanceManage/Revenue">Báo cáo doanh thu</a>
+
+            <div class="group">Hệ thống</div>
+            <a class="@A("/SystemManage/Staff")" href="/SystemManage/Staff">Quản lý nhân viên</a>
+            <a class="@A("/SystemManage/Accounts")" href="/SystemManage/Accounts">Tài khoản &amp; Phân quyền</a>
+        }
+
+        <a class="to-site" href="/Rooms/Index">Xem trang khách hàng</a>
+    </aside>
+
+    <main class="main">
+        <div class="topbar">
+            <div>
+                <h1>@ViewBag.PageTitle</h1>
+                <div class="date">@DateTime.Now.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"))</div>
+            </div>
+            <div class="user-chip">
+                <div class="who"><b>@username</b><span>@RoleHelper.RoleLabel(role)</span></div>
+                <div class="avatar">@(username.Length > 0 ? username.Substring(0, 1).ToUpper() : "?")</div>
+                <a class="out" href="/Account/ChangePassword" style="color:var(--muted)">Đổi mật khẩu</a>
+                <a class="out" href="/Account/Logout">Đăng xuất</a>
+            </div>
+        </div>
+
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success">@TempData["Message"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        @RenderBody()
+    </main>
+    <script>function toggleEdit(id){document.getElementById(id).classList.toggle('show');}</script>
+</body>
+</html>

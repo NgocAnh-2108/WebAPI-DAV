@@ -1,0 +1,55 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<RoomTypeDTO>
+@{
+    Layout = "_AdminLayout";
+    var counts = ViewBag.RoomCount as Dictionary<string, int> ?? new();
+}
+<div class="card">
+    <h3>Thêm loại phòng</h3>
+    <form class="mg-form" asp-action="AddRoomType" method="post">
+        <div class="field"><label>Tên loại</label><input type="text" name="Name" placeholder="VD: Deluxe King" minlength="3" required /></div>
+        <div class="field grow"><label>Mô tả</label><input type="text" name="Description" placeholder="View đồi thông, giường King, bồn tắm..." /></div>
+        <div class="field"><label>Giá / đêm (đ)</label><input type="number" name="BasePrice" min="0" step="1000" required /></div>
+        <div class="field"><label>Khách tối đa</label><input type="number" name="MaxOccupancy" value="2" min="1" max="20" required /></div>
+        <button type="submit" class="btn btn-gold">+ Thêm</button>
+    </form>
+</div>
+
+<div class="card">
+    <h3>Danh sách loại phòng <small>@Model.Count loại</small></h3>
+    <table class="admin-table">
+        <tr><th>Tên</th><th>Mô tả</th><th>Giá/đêm</th><th>Khách tối đa</th><th>Số phòng</th><th>Thao tác</th></tr>
+        @foreach (var rt in Model)
+        {
+            <tr>
+                <td><b>@rt.Name</b></td>
+                <td class="muted">@rt.Description</td>
+                <td>@rt.BasePrice.ToString("N0") đ</td>
+                <td>@rt.MaxOccupancy</td>
+                <td>@(counts.TryGetValue(rt.Name, out var c) ? c : 0)</td>
+                <td>
+                    <div class="actions">
+                        <button type="button" class="btn btn-dark" onclick="toggleEdit('rt-@rt.Id')">Sửa</button>
+                        <form asp-action="DeleteRoomType" method="post" onsubmit="return confirm('Xóa loại phòng @rt.Name?');">
+                            <input type="hidden" name="id" value="@rt.Id" />
+                            <button type="submit" class="btn btn-danger">Xóa</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr id="rt-@rt.Id" class="edit-row">
+                <td colspan="6">
+                    <form class="mg-form" asp-action="EditRoomType" method="post">
+                        <input type="hidden" name="id" value="@rt.Id" />
+                        <div class="field"><label>Tên</label><input type="text" name="Name" value="@rt.Name" minlength="3" required /></div>
+                        <div class="field grow"><label>Mô tả</label><input type="text" name="Description" value="@rt.Description" /></div>
+                        <div class="field"><label>Giá/đêm</label><input type="number" name="BasePrice" value="@((long)rt.BasePrice)" min="0" required /></div>
+                        <div class="field"><label>Khách tối đa</label><input type="number" name="MaxOccupancy" value="@rt.MaxOccupancy" min="1" max="20" required /></div>
+                        <button type="submit" class="btn btn-gold">Lưu</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </table>
+</div>

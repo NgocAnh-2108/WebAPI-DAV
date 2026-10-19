@@ -1,0 +1,75 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<RoomAvailableDTO>
+@{
+    Layout = "_AdminLayout";
+    var customers = ViewBag.Customers as List<CustomerDTO> ?? new();
+}
+<style>
+    .room-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+    .room-pick label { display: block; border: 2px solid var(--line); border-radius: 12px; padding: 14px; cursor: pointer; text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--ink-2); font-weight: 500; transition: .2s; margin: 0; }
+    .room-pick input { display: none; }
+    .room-pick input:checked + div { color: var(--ink); }
+    .room-pick label:has(input:checked) { border-color: var(--gold); background: #fbf6ee; box-shadow: 0 0 0 3px rgba(201,160,95,.15); }
+    .room-pick .no { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 700; }
+    .or { text-align: center; color: var(--muted); font-size: 12px; margin: 10px 0; text-transform: uppercase; letter-spacing: 2px; }
+</style>
+
+<div class="card">
+    <h3>1. Chọn ngày lưu trú</h3>
+    <form class="mg-form" method="get">
+        <div class="field"><label>Nhận phòng</label><input type="date" name="checkIn" value="@ViewBag.CheckIn" required /></div>
+        <div class="field"><label>Trả phòng</label><input type="date" name="checkOut" value="@ViewBag.CheckOut" required /></div>
+        <button class="btn btn-dark">Kiểm tra phòng trống</button>
+    </form>
+    @if (ViewBag.Error != null) { <div class="alert alert-danger" style="margin-top:14px">@ViewBag.Error</div> }
+</div>
+
+<form method="post" asp-action="NewBooking">
+    <input type="hidden" name="checkIn" value="@ViewBag.CheckIn" />
+    <input type="hidden" name="checkOut" value="@ViewBag.CheckOut" />
+
+    <div class="card">
+        <h3>2. Chọn phòng <small>@Model.Count phòng trống từ @ViewBag.CheckIn đến @ViewBag.CheckOut</small></h3>
+        <div class="room-pick">
+            @foreach (var r in Model)
+            {
+                <label>
+                    <input type="checkbox" name="roomIds" value="@r.Id" />
+                    <div>
+                        <div class="no">@r.RoomNumber</div>
+                        <div class="muted">@r.RoomTypeName · tối đa @r.MaxOccupancy khách</div>
+                        <div style="margin-top:6px"><b>@r.TotalPriceForStay.ToString("N0") đ</b> <span class="muted">/ @r.Nights đêm</span></div>
+                    </div>
+                </label>
+            }
+        </div>
+        @if (!Model.Any()) { <p class="empty">Không còn phòng trống trong khoảng ngày này</p> }
+    </div>
+
+    <div class="grid-2">
+        <div class="card">
+            <h3>3. Khách hàng</h3>
+            <label>Khách đã có hồ sơ</label>
+            <select name="customerId" style="width:100%">
+                <option value="">-- Chọn khách hàng --</option>
+                @foreach (var c in customers.OrderBy(c => c.FullName)) { <option value="@c.Id">@c.FullName — @c.Phone</option> }
+            </select>
+            <div class="or">hoặc khách mới</div>
+            <div class="mg-form">
+                <div class="field grow"><label>Họ tên</label><input name="newFullName" /></div>
+                <div class="field"><label>Số điện thoại</label><input name="newPhone" /></div>
+                <div class="field"><label>CCCD</label><input name="newIdentityCard" /></div>
+            </div>
+        </div>
+        <div class="card">
+            <h3>4. Xác nhận</h3>
+            <label>Ghi chú</label>
+            <textarea name="note" rows="3" style="width:100%" placeholder="Yêu cầu đặc biệt..."></textarea>
+            <label style="display:flex;align-items:center;gap:8px;margin-top:14px;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink-2)">
+                <input type="checkbox" name="collectDeposit" value="true" /> Khách đã đóng tiền cọc 30% tại quầy
+            </label>
+            <button class="btn btn-gold" style="margin-top:16px;padding:12px 22px;font-size:14px" disabled="@(!Model.Any())">Tạo booking</button>
+        </div>
+    </div>
+</form>

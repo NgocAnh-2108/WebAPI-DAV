@@ -1,0 +1,114 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<RoomAvailableDTO>
+@{
+    ViewData["Title"] = "DAV Hotel";
+    ViewData["TransparentHeader"] = true;
+    string? hero = ViewBag.HeroImage;
+    int totalRooms = ViewBag.TotalRooms ?? 0;
+    int typeCount = ViewBag.TypeCount ?? 0;
+    var svcs = ViewBag.Services as List<ServiceDTO> ?? new();
+}
+
+<section class="hero">
+    <div class="hero-bg" style="@(string.IsNullOrEmpty(hero) ? "" : $"background-image:url('{hero}')")"></div>
+    <div class="hero-inner">
+        <div class="eyebrow">Chào mừng đến với DAV Hotel &amp; Resort</div>
+        <h1>Nơi mỗi kỳ nghỉ<br />trở thành <em>kỷ niệm</em></h1>
+        <p class="lead">Không gian tinh tế, dịch vụ tận tâm — trải nghiệm nghỉ dưỡng đẳng cấp giữa lòng thành phố ngàn hoa.</p>
+        <div class="line"></div>
+    </div>
+    <div class="scroll-hint">Khám phá</div>
+</section>
+
+<partial name="_BookingBar" />
+
+<section class="intro container reveal">
+    <div class="eyebrow">Về chúng tôi</div>
+    <h2>Sự sang trọng thầm lặng, được tạo nên từ những điều tinh tế nhất</h2>
+    <div class="gold-rule"></div>
+    <p>DAV Hotel mang đến không gian nghỉ dưỡng nơi kiến trúc hiện đại hoà quyện cùng nét ấm áp bản địa. Mỗi căn phòng là một chốn riêng tư để bạn thả lỏng và tận hưởng.</p>
+    <div class="figures">
+        <div><b>@totalRooms</b><span>Phòng &amp; Suites</span></div>
+        <div><b>@typeCount</b><span>Hạng phòng</span></div>
+        <div><b>24/7</b><span>Lễ tân phục vụ</span></div>
+    </div>
+</section>
+
+@* ===== PHÒNG NỔI BẬT ===== *@
+@if (Model.Any())
+{
+    <section class="featured container">
+        <div class="sec-head reveal">
+            <div class="eyebrow">Phòng nổi bật</div>
+            <h2>Những không gian được yêu thích nhất</h2>
+        </div>
+        <div class="featured-grid">
+            @foreach (var r in Model)
+            {
+                var img = r.ImageUrls.FirstOrDefault();
+                <a class="feat reveal" href="/Rooms/Detail/@r.Id">
+                    @if (!string.IsNullOrEmpty(img)) { <img src="@img" alt="Phòng @r.RoomNumber" loading="lazy" /> }
+                    <div class="cap">
+                        <div class="type">@r.RoomTypeName</div>
+                        <h3>Phòng @r.RoomNumber</h3>
+                        <p>@(r.Description ?? "Không gian ấm cúng, nội thất cao cấp, đầy đủ tiện nghi.")</p>
+                        <div class="row">
+                            <div class="price">@r.BasePrice.ToString("N0")₫ <small>/ đêm</small></div>
+                            <span class="go">Khám phá</span>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+        <div class="center-link reveal"><a class="btn-lux ghost" href="/Rooms/List">Xem tất cả phòng nghỉ</a></div>
+    </section>
+}
+
+@* ===== TIỆN ÍCH ===== *@
+<section class="amenities">
+    <div class="container">
+        <div class="sec-head reveal">
+            <div class="eyebrow">Tiện ích</div>
+            <h2>Mọi thứ bạn cần, ngay trong khách sạn</h2>
+        </div>
+        <div class="amen-grid">
+            <div class="amen reveal"><div class="num">01</div><h3>Hồ bơi nước ấm</h3><p>Hồ bơi bốn mùa nhìn ra đồi thông, có ghế tắm nắng và quầy nước bên hồ.</p><div class="hours">06:00 – 21:00</div></div>
+            <div class="amen reveal"><div class="num">02</div><h3>Nhà hàng DAV</h3><p>Buffet sáng Á – Âu và thực đơn tối theo mùa từ nguyên liệu Đà Lạt.</p><div class="hours">06:00 – 22:00</div></div>
+            <div class="amen reveal"><div class="num">03</div><h3>Spa &amp; trị liệu</h3><p>Massage tinh dầu, xông hơi thảo mộc trong không gian yên tĩnh.</p><div class="hours">09:00 – 22:00</div></div>
+            <div class="amen reveal"><div class="num">04</div><h3>Phòng tập</h3><p>Thiết bị cardio và tạ hiện đại, mở cửa suốt ngày cho khách lưu trú.</p><div class="hours">Cả ngày</div></div>
+            <div class="amen reveal"><div class="num">05</div><h3>Lounge &amp; bar</h3><p>Cà phê, cocktail và trà nóng bên lò sưởi vào những buổi tối se lạnh.</p><div class="hours">16:00 – 24:00</div></div>
+            <div class="amen reveal"><div class="num">06</div><h3>Lễ tân 24/7</h3><p>Nhận phòng nhanh bằng mã booking, Wi-Fi miễn phí và bãi đỗ xe riêng.</p><div class="hours">Cả ngày</div></div>
+        </div>
+    </div>
+</section>
+
+@* ===== GIỚI THIỆU DỊCH VỤ ===== *@
+@if (svcs.Any())
+{
+    <section class="services container">
+        <div class="sec-head reveal">
+            <div class="eyebrow">Dịch vụ</div>
+            <h2>Chăm chút từng khoảnh khắc</h2>
+            <p>Đặt kèm ngay khi đặt phòng hoặc yêu cầu tại quầy lễ tân trong thời gian lưu trú</p>
+        </div>
+        <div class="svc-teaser">
+            @foreach (var s in svcs.Take(3))
+            {
+                <div class="svc-card reveal">
+                    <div class="cat">@s.Category</div>
+                    <h3>@s.Name</h3>
+                    <p>@s.Description</p>
+                    <div class="p">@s.Price.ToString("N0")₫ <small>/ @s.Unit</small></div>
+                </div>
+            }
+        </div>
+        <div class="center-link reveal"><a class="btn-lux ghost" href="/Services">Xem tất cả dịch vụ</a></div>
+    </section>
+}
+
+<section class="cta reveal">
+    <div class="eyebrow">Đặt phòng trực tuyến</div>
+    <h2>Kỳ nghỉ hoàn hảo của bạn chỉ cách vài cú nhấp chuột</h2>
+    <a class="btn-lux" href="#book">Chọn ngày lưu trú</a>
+</section>

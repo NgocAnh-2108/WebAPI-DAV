@@ -1,0 +1,70 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<ManageRoomDTO>
+@{
+    Layout = "_AdminLayout";
+    var days = ViewBag.Days as List<DateTime> ?? new();
+    var bookings = ViewBag.Bookings as List<BookingWithDetailDTO> ?? new();
+    DateTime from = ViewBag.From;
+    var vi = new System.Globalization.CultureInfo("vi-VN");
+}
+<style>
+    .cal-wrap { overflow-x: auto; }
+    .cal { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 980px; }
+    .cal th, .cal td { border-bottom: 1px solid var(--line); border-right: 1px solid #f4efe7; padding: 0; height: 42px; text-align: center; font-size: 12px; }
+    .cal th { background: #faf7f2; color: var(--muted); font-weight: 600; padding: 6px 2px; }
+    .cal th.today { background: var(--ink-2); color: var(--gold-2); }
+    .cal td.room { text-align: left; padding: 0 12px; font-weight: 700; white-space: nowrap; background: #fff; position: sticky; left: 0; z-index: 1; }
+    .cal td.room small { display: block; font-weight: 400; color: var(--muted); font-size: 11px; }
+    .cell { height: 100%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 600; overflow: hidden; white-space: nowrap; padding: 0 4px; text-decoration: none; }
+    .c-Pending { background: #dc9a2f; } .c-Confirmed { background: #3aa56b; } .c-CheckedIn { background: #3d87bd; } .c-CheckedOut { background: #a3a9aa; }
+    .legend { display: flex; gap: 14px; font-size: 12px; flex-wrap: wrap; } .legend i { width: 12px; height: 12px; display: inline-block; border-radius: 3px; vertical-align: middle; margin-right: 4px; }
+</style>
+<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+        <div class="actions">
+            <a class="btn btn-outline" href="?from=@from.AddDays(-7).ToString("yyyy-MM-dd")">← Tuần trước</a>
+            <a class="btn btn-dark" href="?">Hôm nay</a>
+            <a class="btn btn-outline" href="?from=@from.AddDays(7).ToString("yyyy-MM-dd")">Tuần sau →</a>
+            <form method="get"><input type="date" name="from" value="@from.ToString("yyyy-MM-dd")" onchange="this.form.submit()" /></form>
+        </div>
+        <div class="legend">
+            <span><i style="background:#dc9a2f"></i>Chờ cọc</span><span><i style="background:#3aa56b"></i>Đã xác nhận</span>
+            <span><i style="background:#3d87bd"></i>Đang ở</span><span><i style="background:#a3a9aa"></i>Đã trả</span>
+        </div>
+    </div>
+    <div class="cal-wrap">
+        <table class="cal">
+            <tr>
+                <th style="text-align:left;padding-left:12px">Phòng</th>
+                @foreach (var d in days)
+                {
+                    <th class="@(d == DateTime.Today ? "today" : "")">@d.ToString("ddd", vi)<br /><b>@d.ToString("dd/MM")</b></th>
+                }
+            </tr>
+            @foreach (var r in Model)
+            {
+                <tr>
+                    <td class="room">@r.RoomNumber<small>@r.RoomTypeName</small></td>
+                    @for (int i = 0; i < days.Count; i++)
+                    {
+                        var d = days[i];
+                        var b = bookings.FirstOrDefault(x => x.RoomNumbers.Contains(r.RoomNumber) && x.CheckInDate.Date <= d && x.CheckOutDate.Date > d);
+                        if (b == null)
+                        {
+                            <td></td>
+                        }
+                        else
+                        {
+                            // gộp các ngày liên tiếp cùng booking thành 1 ô
+                            int span = 1;
+                            while (i + span < days.Count && b.CheckOutDate.Date > days[i + span]) span++;
+                            <td colspan="@span"><a class="cell c-@b.Status" href="/BookingManage/Index?q=@b.BookingCode" title="@b.BookingCode · @b.CustomerName">@b.CustomerName</a></td>
+                            i += span - 1;
+                        }
+                    }
+                </tr>
+            }
+        </table>
+    </div>
+</div>

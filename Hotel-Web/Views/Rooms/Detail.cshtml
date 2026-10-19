@@ -1,0 +1,143 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model RoomAvailableDTO
+@{
+    ViewData["Title"] = $"Phòng {Model.RoomNumber}";
+    ViewData["TransparentHeader"] = true;
+    string? role = ViewBag.Role;
+    var img = Model.ImageUrls.FirstOrDefault();
+    var similar = ViewBag.Similar as List<RoomAvailableDTO> ?? new();
+    var today = DateTime.Today.ToString("yyyy-MM-dd");
+}
+<style>
+    .d-hero { position: relative; height: 78vh; min-height: 520px; overflow: hidden; display: flex; align-items: flex-end; color: #fff; }
+    .d-hero .bg { position: absolute; inset: 0; background: linear-gradient(135deg, #3a2f25, #6b5643); background-size: cover; background-position: center; animation: zoom 20s ease-in-out infinite alternate; }
+    @@keyframes zoom { from { transform: scale(1); } to { transform: scale(1.1); } }
+    .d-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,12,9,.35), rgba(15,12,9,.85)); }
+    .d-hero .container { position: relative; z-index: 2; padding-bottom: 70px; width: 100%; }
+    .d-hero h1 { font-size: clamp(48px, 7vw, 86px); font-weight: 500; margin-top: 10px; animation: rise 1.1s ease both; }
+    .d-hero .eyebrow { color: var(--champagne); animation: rise 1s ease both; }
+    @@keyframes rise { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
+    .d-body { display: grid; grid-template-columns: 1.6fr 1fr; gap: 70px; padding: 80px 0 0; }
+    .d-body h2 { font-size: 40px; font-weight: 500; }
+    .d-body p { color: #6f6255; font-weight: 300; font-size: 17px; margin-top: 18px; }
+    .specs { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 40px; border-top: 1px solid var(--line); }
+    .specs div { padding: 24px 0; border-bottom: 1px solid var(--line); }
+    .specs span { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); display: block; }
+    .specs b { font-family: var(--serif); font-size: 26px; font-weight: 500; }
+    .amen { columns: 2; margin-top: 30px; list-style: none; }
+    .amen li { padding: 10px 0; border-bottom: 1px dashed var(--line); font-weight: 300; break-inside: avoid; }
+    .reserve { background: #fff; padding: 38px; box-shadow: 0 30px 60px rgba(23,19,15,.1); position: sticky; top: 110px; align-self: start; }
+    .reserve .price { font-family: var(--serif); font-size: 42px; font-weight: 600; line-height: 1; }
+    .reserve .price small { font-family: var(--sans); font-size: 13px; color: var(--muted); font-weight: 400; }
+    .reserve form { display: grid; gap: 16px; margin-top: 26px; }
+    .reserve .sum { background: var(--sand); padding: 16px; font-size: 14px; display: grid; gap: 6px; }
+    .reserve .sum div { display: flex; justify-content: space-between; }
+    .similar { margin-top: 110px; }
+    .similar .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 36px; }
+    .similar a { text-decoration: none; display: block; }
+    .similar .ph { height: 220px; overflow: hidden; background: linear-gradient(135deg, #3a2f25, #6b5643); }
+    .similar img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s; }
+    .similar a:hover img { transform: scale(1.08); }
+    .similar h4 { font-size: 24px; font-weight: 500; margin-top: 14px; }
+    @@media (max-width: 900px) { .d-body, .similar .row { grid-template-columns: 1fr; } }
+</style>
+
+<section class="d-hero">
+    <div class="bg" style="@(string.IsNullOrEmpty(img) ? "" : $"background-image:url('{img}')")"></div>
+    <div class="container">
+        <div class="eyebrow">@Model.RoomTypeName</div>
+        <h1>Phòng @Model.RoomNumber</h1>
+    </div>
+</section>
+
+<div class="container">
+    <div class="d-body">
+        <div class="reveal">
+            <div class="eyebrow">Tổng quan</div>
+            <h2>Một không gian dành riêng cho bạn</h2>
+            <p>@(Model.Description ?? "Thiết kế thanh lịch với gam màu trầm ấm, ánh sáng tự nhiên và nội thất cao cấp — nơi lý tưởng để nghỉ ngơi sau một ngày khám phá.")</p>
+            <div class="specs">
+                <div><span>Hạng phòng</span><b>@Model.RoomTypeName</b></div>
+                <div><span>Sức chứa</span><b>@Model.MaxOccupancy khách</b></div>
+                <div><span>Vị trí</span><b>Tầng @Model.Floor</b></div>
+            </div>
+            <ul class="amen">
+                <li>Giường cao cấp, chăn ga cotton Ai Cập</li>
+                <li>Phòng tắm đá cẩm thạch, đồ dùng thương hiệu</li>
+                <li>Wi-Fi tốc độ cao miễn phí</li>
+                <li>Smart TV, máy pha cà phê</li>
+                <li>Minibar và két an toàn</li>
+                <li>Dọn phòng hằng ngày</li>
+            </ul>
+        </div>
+
+        <aside class="reserve reveal">
+            <div class="eyebrow">Giá từ</div>
+            <div class="price" style="margin-top:8px">@Model.BasePrice.ToString("N0")₫ <small>/ đêm</small></div>
+            @if (Model.Status == "Maintenance")
+            {
+                <p style="margin-top:20px;color:#a8443b">Phòng đang được bảo trì, vui lòng chọn phòng khác.</p>
+            }
+            else if (role == "Customer")
+            {
+                <form action="/Bookings/Confirm" method="get">
+                    <input type="hidden" name="roomId" value="@Model.Id" />
+                    <div class="fld"><label>Nhận phòng</label><input type="date" name="checkIn" id="dci" value="@ViewBag.CheckIn" min="@today" required /></div>
+                    <div class="fld"><label>Trả phòng</label><input type="date" name="checkOut" id="dco" value="@ViewBag.CheckOut" min="@today" required /></div>
+                    <div class="sum">
+                        <div><span id="sn">1 đêm</span><b id="st">@Model.BasePrice.ToString("N0")₫</b></div>
+                        <div><span>Đặt cọc 30%</span><b id="sd">@((Model.BasePrice * 0.3m).ToString("N0"))₫</b></div>
+                    </div>
+                    <button class="btn-lux block">Tiếp tục — chọn dịch vụ</button>
+                </form>
+            }
+            else if (role == "Manager" || role == "Receptionist")
+            {
+                <a class="btn-lux block" style="margin-top:26px" href="/BookingManage/NewBooking">Đặt cho khách tại quầy</a>
+            }
+            else
+            {
+                <p style="margin-top:18px;color:var(--muted);font-weight:300">Đăng nhập tài khoản hội viên để đặt phòng và nhận mã booking ngay.</p>
+                <a class="btn-lux gold block" style="margin-top:20px" href="/Account/Login?returnUrl=@Uri.EscapeDataString(Context.Request.Path + Context.Request.QueryString)">Đăng nhập để đặt phòng</a>
+                <a class="btn-lux ghost block" style="margin-top:10px" href="/Account/Register?returnUrl=@Uri.EscapeDataString(Context.Request.Path + Context.Request.QueryString)">Tạo tài khoản</a>
+            }
+        </aside>
+    </div>
+
+    @if (similar.Any())
+    {
+        <section class="similar">
+            <div class="eyebrow">Có thể bạn quan tâm</div>
+            <h2 style="font-size:40px;font-weight:500;margin-top:8px">Phòng cùng hạng</h2>
+            <div class="row">
+                @foreach (var s in similar)
+                {
+                    <a class="reveal" href="/Rooms/Detail/@s.Id">
+                        <div class="ph">@if (s.ImageUrls.Any()) { <img src="@s.ImageUrls[0]" alt="" /> }</div>
+                        <h4>Phòng @s.RoomNumber</h4>
+                        <div style="color:var(--muted)">@s.BasePrice.ToString("N0")₫ / đêm</div>
+                    </a>
+                }
+            </div>
+        </section>
+    }
+</div>
+
+<script>
+    (function () {
+        var ci = document.getElementById('dci'), co = document.getElementById('dco');
+        if (!ci) return;
+        var price = @((long)Model.BasePrice);
+        function fmt(v) { return Math.round(v).toLocaleString('vi-VN') + '₫'; }
+        function upd() {
+            var d = Math.round((new Date(co.value) - new Date(ci.value)) / 86400000);
+            if (d < 1) d = 0;
+            document.getElementById('sn').textContent = d + ' đêm';
+            document.getElementById('st').textContent = fmt(price * d);
+            document.getElementById('sd').textContent = fmt(price * d * 0.3);
+            co.min = ci.value;
+        }
+        ci.addEventListener('change', upd); co.addEventListener('change', upd); upd();
+    })();
+</script>

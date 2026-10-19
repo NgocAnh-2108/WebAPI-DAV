@@ -1,0 +1,25 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@{
+    Layout = "_AdminLayout";
+}
+<div class="grid-2">
+    <div class="card">
+        <h3>Chính sách đặt phòng</h3>
+        <table class="admin-table">
+            <tr><td class="muted">Tỷ lệ đặt cọc</td><td><b>30%</b> tổng tiền phòng</td></tr>
+            <tr><td class="muted">Hủy phòng (khách tự hủy)</td><td>Chỉ khi booking đang <b>Chờ thanh toán cọc</b></td></tr>
+            <tr><td class="muted">Điều kiện nhận phòng</td><td>Đã cọc + trạng thái <b>Đã xác nhận</b></td></tr>
+            <tr><td class="muted">Giờ nhận / trả phòng</td><td>14:00 / 12:00</td></tr>
+        </table>
+        <p class="muted" style="margin-top:12px">Các giá trị trên đang cấu hình cố định trong code API (SQLBookingRepository.DepositRate).</p>
+    </div>
+    <div class="card">
+        <h3>Kết nối hệ thống</h3>
+        <table class="admin-table">
+            <tr><td class="muted">API</td><td class="code">@ViewBag.ApiUrl</td></tr>
+            <tr><td class="muted">Swagger</td><td><a href="@ViewBag.ApiUrl/swagger" target="_blank">@ViewBag.ApiUrl/swagger</a></td></tr>
+            <tr><td class="muted">Phiên đăng nhập</td><td>8 giờ (theo JWT)</td></tr>
+        </table>
+    </div>
+</div>

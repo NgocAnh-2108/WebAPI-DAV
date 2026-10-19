@@ -1,0 +1,102 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<ServiceDTO>
+@{
+    Layout = "_AdminLayout";
+    bool isManager = ViewBag.IsManager == true;
+    string? cat = ViewBag.Category;
+    var counts = ViewBag.CountByCat as Dictionary<string, int> ?? new();
+    var cats = Hotel_Web.Controllers.ServiceManageController.Categories;
+}
+<style>
+    .svc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+    .svc { border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; background: #fff; transition: .2s; }
+    .svc:hover { box-shadow: 0 8px 20px rgba(43,36,32,.07); }
+    .svc.off { opacity: .55; }
+    .svc .cat { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); font-weight: 700; }
+    .svc .name { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; color: var(--ink); }
+    .svc .desc { font-size: 13px; color: var(--muted); min-height: 18px; }
+    .svc .price { font-size: 18px; font-weight: 700; margin-top: 4px; }
+    .svc .price small { font-size: 12px; color: var(--muted); font-weight: 500; }
+    .svc .foot { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--line); }
+    .svc form.edit { display: none; margin-top: 10px; gap: 8px; flex-direction: column; }
+    .svc form.edit.show { display: flex; }
+    .svc form.edit input, .svc form.edit select { width: 100%; }
+</style>
+
+@if (isManager)
+{
+    <div class="card">
+        <h3>Thêm dịch vụ mới</h3>
+        <form class="mg-form" asp-action="Add" method="post">
+            <div class="field grow"><label>Tên dịch vụ</label><input name="Name" minlength="2" placeholder="VD: Massage đá nóng" required /></div>
+            <div class="field">
+                <label>Nhóm</label>
+                <select name="Category">@foreach (var c in cats) { <option>@c</option> }</select>
+            </div>
+            <div class="field"><label>Đơn giá (đ)</label><input type="number" name="Price" min="0" step="1000" required /></div>
+            <div class="field"><label>Đơn vị</label><input name="Unit" placeholder="lần, suất, kg..." required /></div>
+            <div class="field grow"><label>Mô tả</label><input name="Description" /></div>
+            <input type="hidden" name="IsActive" value="true" />
+            <button class="btn btn-gold">+ Thêm</button>
+        </form>
+    </div>
+}
+
+<div class="card">
+    <h3>
+        Dịch vụ khách sạn <small>@Model.Count dịch vụ</small>
+        <a class="btn btn-dark" href="/ServiceManage/Usage">Ghi nhận dịch vụ cho khách →</a>
+    </h3>
+    <div class="tabs">
+        <a class="@(string.IsNullOrEmpty(cat) ? "on" : "")" href="?">Tất cả</a>
+        @foreach (var c in cats)
+        {
+            <a class="@(cat == c ? "on" : "")" href="?category=@Uri.EscapeDataString(c)">@c (@(counts.TryGetValue(c, out var n) ? n : 0))</a>
+        }
+    </div>
+
+    <div class="svc-grid">
+        @foreach (var s in Model)
+        {
+            <div class="svc @(s.IsActive ? "" : "off")">
+                <div class="cat">@s.Category</div>
+                <div class="name">@s.Name</div>
+                <div class="desc">@s.Description</div>
+                <div class="price">@s.Price.ToString("N0") đ <small>/ @s.Unit</small></div>
+                <div class="foot">
+                    <span class="muted" style="font-size:12px">
+                        @if (!s.IsActive) { <span class="pill pill-Cancelled">Ngừng cung cấp</span> }
+                        else { <text>Đã dùng @s.UsageCount lần</text> }
+                    </span>
+                    @if (isManager)
+                    {
+                        <div class="actions">
+                            <button type="button" class="btn btn-outline" onclick="document.getElementById('sv-@s.Id').classList.toggle('show')">Sửa</button>
+                            <form asp-action="Delete" method="post" onsubmit="return confirm('Xóa dịch vụ @s.Name? (Nếu đã có khách dùng sẽ chuyển sang Ngừng cung cấp)');">
+                                <input type="hidden" name="id" value="@s.Id" />
+                                <button class="btn btn-danger">Xóa</button>
+                            </form>
+                        </div>
+                    }
+                </div>
+                @if (isManager)
+                {
+                    <form class="edit" id="sv-@s.Id" asp-action="Edit" method="post">
+                        <input type="hidden" name="id" value="@s.Id" />
+                        <input name="Name" value="@s.Name" minlength="2" required />
+                        <select name="Category">@foreach (var c in cats) { <option selected="@(c == s.Category)">@c</option> }</select>
+                        <div style="display:flex;gap:8px"><input type="number" name="Price" value="@((long)s.Price)" min="0" required /><input name="Unit" value="@s.Unit" required /></div>
+                        <input name="Description" value="@s.Description" placeholder="Mô tả" />
+                        <select name="IsActive">
+                            <option value="true" selected="@s.IsActive">Đang cung cấp</option>
+                            <option value="false" selected="@(!s.IsActive)">Ngừng cung cấp</option>
+                        </select>
+                        <button class="btn btn-gold">Lưu</button>
+                    </form>
+                }
+            </div>
+        }
+    </div>
+    @if (!Model.Any()) { <p class="empty">Chưa có dịch vụ nào (hãy chạy Update-Database để có dữ liệu mẫu)</p> }
+</div>

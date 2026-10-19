@@ -1,0 +1,80 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model BookingWithDetailDTO
+@{
+    Layout = "_AdminLayout";
+    var checkedIn = Model.Status == "CheckedIn";
+    var pricePerNight = Model.Rooms.Sum(r => r.BasePrice);
+}
+<style>
+    .quick { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .quick button { font-size: 12px; }
+    .preview { margin-top: 18px; padding: 14px 16px; border-radius: 12px; background: #fbf6ee; font-size: 14px; }
+</style>
+
+<div class="card">
+    <h3>Booking <span class="code">@Model.BookingCode</span> <span class="pill pill-@Model.Status">@RoleHelper.StatusLabel(Model.Status)</span>
+        <small>@Model.CustomerName · phòng @string.Join(", ", Model.RoomNumbers)</small></h3>
+    <p class="muted">Giờ chuẩn của khách sạn: nhận phòng <b>14:00</b>, trả phòng <b>12:00</b>. Đổi giờ để ghi nhận nhận phòng sớm / trả phòng muộn / gia hạn.
+        Nếu số đêm thay đổi, tiền phòng tự cộng/trừ theo giá @pricePerNight.ToString("N0") đ/đêm.</p>
+
+    <form asp-action="ChangeTime" method="post" class="grid-2" style="margin-top:14px">
+        <input type="hidden" name="id" value="@Model.Id" />
+        <div>
+            <div class="field">
+                <label>Giờ nhận phòng @(checkedIn ? "(khách đã nhận phòng — không đổi được)" : "")</label>
+                <input type="datetime-local" id="ci" name="checkInDate" value="@Model.CheckInDate.ToString("yyyy-MM-dd'T'HH:mm")" readonly="@checkedIn" required oninput="preview()" />
+            </div>
+            @if (!checkedIn)
+            {
+                <div class="quick">
+                    <button type="button" class="btn btn-outline" onclick="setTime('ci','08:00')">Nhận sớm 08:00</button>
+                    <button type="button" class="btn btn-outline" onclick="setTime('ci','10:00')">10:00</button>
+                    <button type="button" class="btn btn-outline" onclick="setTime('ci','12:00')">12:00</button>
+                    <button type="button" class="btn btn-outline" onclick="setTime('ci','14:00')">Chuẩn 14:00</button>
+                </div>
+            }
+        </div>
+        <div>
+            <div class="field">
+                <label>Giờ trả phòng</label>
+                <input type="datetime-local" id="co" name="checkOutDate" value="@Model.CheckOutDate.ToString("yyyy-MM-dd'T'HH:mm")" required oninput="preview()" />
+            </div>
+            <div class="quick">
+                <button type="button" class="btn btn-outline" onclick="setTime('co','12:00')">Chuẩn 12:00</button>
+                <button type="button" class="btn btn-outline" onclick="setTime('co','15:00')">Trả muộn 15:00</button>
+                <button type="button" class="btn btn-outline" onclick="setTime('co','18:00')">18:00</button>
+                <button type="button" class="btn btn-outline" onclick="addDay(1)">+1 đêm</button>
+                <button type="button" class="btn btn-outline" onclick="addDay(-1)">−1 đêm</button>
+            </div>
+        </div>
+        <div style="grid-column:1/-1">
+            <div class="preview" id="pv"></div>
+            <div class="actions" style="margin-top:16px">
+                <button class="btn btn-gold">Lưu giờ mới</button>
+                <a class="btn btn-outline" href="/BookingManage/Index">Hủy</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    var oldNights = @Model.Nights, perNight = @((long)pricePerNight), total = @((long)Model.TotalPrice);
+    function setTime(id, t) { var el = document.getElementById(id); el.value = el.value.substring(0, 10) + 'T' + t; preview(); }
+    function addDay(d) {
+        var el = document.getElementById('co'); var dt = new Date(el.value); dt.setDate(dt.getDate() + d);
+        var p = function (n) { return (n < 10 ? '0' : '') + n; };
+        el.value = dt.getFullYear() + '-' + p(dt.getMonth() + 1) + '-' + p(dt.getDate()) + 'T' + p(dt.getHours()) + ':' + p(dt.getMinutes()); preview();
+    }
+    function preview() {
+        var ci = new Date(document.getElementById('ci').value), co = new Date(document.getElementById('co').value);
+        var d0 = new Date(ci.getFullYear(), ci.getMonth(), ci.getDate()), d1 = new Date(co.getFullYear(), co.getMonth(), co.getDate());
+        var nights = Math.round((d1 - d0) / 86400000), diff = nights - oldNights;
+        var txt = 'Lưu trú mới: <b>' + nights + ' đêm</b>';
+        if (co <= ci) txt = '<span style="color:#b13b3b">Giờ trả phòng phải sau giờ nhận phòng</span>';
+        else if (diff != 0) txt += ' (' + (diff > 0 ? '+' : '') + diff + ' đêm) — tiền phòng mới: <b>' + (total + diff * perNight).toLocaleString('vi-VN') + ' đ</b>';
+        else txt += ' — tiền phòng không đổi';
+        document.getElementById('pv').innerHTML = txt;
+    }
+    preview();
+</script>

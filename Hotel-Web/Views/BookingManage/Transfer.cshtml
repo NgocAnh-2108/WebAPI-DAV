@@ -1,0 +1,106 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model TransferOptionsResultDTO
+@{
+    Layout = "_AdminLayout";
+    var history = ViewBag.History as List<RoomTransferDTO> ?? new();
+    var tierLabel = new Dictionary<string, string> { ["Same"] = "Cùng hạng", ["Lower"] = "Hạng thấp hơn", ["Higher"] = "Nâng hạng miễn phí" };
+    var policyColor = Model.Policy switch { "Same" => "#e4f4ea", "Lower" => "#fcf0dc", "Higher" => "#e3eefb", _ => "#f6e3e3" };
+}
+<style>
+    .room-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+    .room-pick label { display: block; border: 2px solid var(--line); border-radius: 12px; padding: 14px; cursor: pointer; text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--ink-2); font-weight: 500; margin: 0; }
+    .room-pick input { display: none; }
+    .room-pick label:has(input:checked) { border-color: var(--gold); background: #fbf6ee; box-shadow: 0 0 0 3px rgba(201,160,95,.15); }
+    .room-pick .no { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 700; }
+    .policy-box { border-radius: 12px; padding: 14px 16px; font-size: 14px; margin-bottom: 16px; }
+    .from-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+</style>
+
+<div class="card">
+    <h3>Chuyển phòng cho khách <small>Booking <span class="code">@Model.BookingCode</span> · @Model.CustomerName</small></h3>
+
+    @if (Model.CurrentRooms.Count > 1)
+    {
+        <div class="from-tabs">
+            <span class="muted" style="align-self:center">Phòng cần chuyển:</span>
+            @foreach (var r in Model.CurrentRooms)
+            {
+                <a class="btn @(r.RoomId == Model.FromRoomId ? "btn-dark" : "btn-outline")" href="/BookingManage/Transfer/@Model.BookingId?fromRoomId=@r.RoomId">@r.RoomNumber</a>
+            }
+        </div>
+    }
+
+    <div class="grid-2" style="margin-bottom:14px">
+        <div><label>Phòng hiện tại (gặp sự cố)</label><div style="font-size:20px"><b>@Model.FromRoomNumber</b> · @Model.FromRoomTypeName · @Model.FromPrice.ToString("N0") đ/đêm</div></div>
+        <div><label>Số đêm còn lại</label><div style="font-size:20px"><b>@Model.RemainingNights</b> đêm</div></div>
+    </div>
+
+    <div class="policy-box" style="background:@policyColor"><b>Chính sách:</b> @Model.PolicyMessage</div>
+
+    @if (Model.Options.Any())
+    {
+        <form asp-action="Transfer" method="post">
+            <input type="hidden" name="id" value="@Model.BookingId" />
+            <input type="hidden" name="FromRoomId" value="@Model.FromRoomId" />
+            <div class="room-pick">
+                @{ var first = true; }
+                @foreach (var o in Model.Options)
+                {
+                    <label>
+                        <input type="radio" name="ToRoomId" value="@o.RoomId" checked="@first" />
+                        <div>
+                            <div class="no">@o.RoomNumber</div>
+                            <div class="muted">@o.RoomTypeName · tầng @o.Floor</div>
+                            <div style="margin-top:6px"><b>@o.BasePrice.ToString("N0") đ</b> <span class="muted">/ đêm</span></div>
+                            <div style="margin-top:6px"><span class="pill pill-@(o.Tier == "Same" ? "Confirmed" : o.Tier == "Lower" ? "Pending" : "CheckedIn")">@tierLabel[o.Tier]</span></div>
+                            @if (o.EstimatedDiscount > 0)
+                            {
+                                <div style="margin-top:6px;color:#2f7a4f">Trừ vào hóa đơn: <b>-@o.EstimatedDiscount.ToString("N0") đ</b></div>
+                                <div class="muted">(@((Model.FromPrice - o.BasePrice).ToString("N0")) đ × @Model.RemainingNights đêm)</div>
+                            }
+                        </div>
+                    </label>
+                    first = false;
+                }
+            </div>
+            <div class="mg-form" style="margin-top:16px">
+                <div class="field grow"><label>Lý do chuyển phòng</label><input name="Reason" placeholder="VD: điều hòa hỏng, rò nước, ồn..." /></div>
+            </div>
+            <label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;margin-top:10px">
+                <input type="checkbox" name="MarkOldRoomMaintenance" value="true" checked /> Đưa phòng @Model.FromRoomNumber vào bảo trì sau khi chuyển
+            </label>
+            <input type="hidden" name="MarkOldRoomMaintenance" value="false" />
+            <div class="actions" style="margin-top:16px">
+                <button class="btn btn-gold" onclick="return confirm('Xác nhận chuyển khách sang phòng đã chọn?');">Chuyển phòng</button>
+                <a class="btn btn-outline" href="/BookingManage/CheckOut">Hủy</a>
+            </div>
+        </form>
+    }
+    else
+    {
+        <p class="empty">Không còn phòng trống để chuyển. Có thể cân nhắc hủy phần còn lại của kỳ nghỉ (khách sạn hủy — hoàn 100% cọc).</p>
+    }
+</div>
+
+@if (history.Any())
+{
+    <div class="card">
+        <h3>Lịch sử chuyển phòng</h3>
+        <table class="admin-table">
+            <tr><th>Thời gian</th><th>Từ phòng</th><th>Sang phòng</th><th class="right">Giá cũ → mới</th><th>Số đêm</th><th class="right">Giảm trừ</th><th>Lý do</th></tr>
+            @foreach (var h in history)
+            {
+                <tr>
+                    <td>@h.CreatedDate.ToString("HH:mm dd/MM/yyyy")</td>
+                    <td class="code">@h.FromRoomNumber</td>
+                    <td class="code">@h.ToRoomNumber</td>
+                    <td class="right">@h.OldPricePerNight.ToString("N0") → @h.NewPricePerNight.ToString("N0")</td>
+                    <td>@h.RemainingNights</td>
+                    <td class="right">@(h.DiscountAmount > 0 ? "-" + h.DiscountAmount.ToString("N0") + " đ" : "—")</td>
+                    <td>@h.Reason</td>
+                </tr>
+            }
+        </table>
+    </div>
+}

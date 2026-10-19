@@ -1,0 +1,61 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<Hotel_Web.Controllers.RevenueRowDTO>
+@{
+    Layout = "_AdminLayout";
+    var years = ViewBag.Years as List<int> ?? new();
+    var max = Model.Count > 0 ? Math.Max(1, Model.Max(m => m.Revenue)) : 1;
+}
+<style>
+    .bars { display: flex; align-items: flex-end; gap: 10px; height: 220px; margin-top: 10px; }
+    .bar { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+    .bar .b { width: 100%; max-width: 40px; background: linear-gradient(180deg, var(--gold-2), var(--gold)); border-radius: 8px 8px 3px 3px; min-height: 3px; animation: grow .9s ease both; transform-origin: bottom; }
+    .bar span { font-size: 11px; color: var(--muted); margin-top: 6px; }
+    @@keyframes grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+</style>
+<div class="card">
+    <form class="mg-form" method="get">
+        <div class="field"><label>Năm</label>
+            <select name="year" onchange="this.form.submit()">
+                @foreach (var y in years) { <option value="@y" selected="@(y == (int)ViewBag.Year)">@y</option> }
+            </select>
+        </div>
+    </form>
+</div>
+<div class="stat-grid">
+    <div class="stat-box" style="--accent:#f3e6cf"><div class="label">Doanh thu năm @ViewBag.Year</div><div class="value" style="font-size:30px">@(((decimal)ViewBag.TotalRevenue).ToString("N0")) đ</div></div>
+    <div class="stat-box" style="--accent:#e2eef7"><div class="label">Doanh thu dịch vụ</div><div class="value" style="font-size:30px">@(((decimal)ViewBag.TotalService).ToString("N0")) đ</div></div>
+    <div class="stat-box"><div class="label">Tiền cọc đã thu</div><div class="value" style="font-size:30px">@(((decimal)ViewBag.TotalDeposit).ToString("N0")) đ</div></div>
+    <div class="stat-box" style="--accent:#e4f4ea"><div class="label">Số booking</div><div class="value">@ViewBag.TotalBookings</div></div>
+    <div class="stat-box" style="--accent:#f9e3e1"><div class="label">Booking bị hủy</div><div class="value">@ViewBag.TotalCancelled</div></div>
+</div>
+<div class="card">
+    <h3>Biểu đồ doanh thu theo tháng</h3>
+    <div class="bars">
+        @foreach (var m in Model)
+        {
+            <div class="bar" title="@m.Revenue.ToString("N0") đ"><div class="b" style="height:@((int)(m.Revenue * 100 / max))%"></div><span>T@(m.Month)</span></div>
+        }
+    </div>
+</div>
+<div class="card">
+    <h3>Chi tiết theo tháng <small>Doanh thu = tiền phòng booking đã trả phòng + tiền cọc booking đang hiệu lực + dịch vụ</small></h3>
+    <table class="admin-table">
+        <tr><th>Tháng</th><th>Số booking</th><th>Bị hủy</th><th class="right">Tiền cọc</th><th class="right">Dịch vụ</th><th class="right">Phí hủy giữ lại</th><th class="right">Doanh thu</th></tr>
+        @foreach (var m in Model)
+        {
+            <tr><td>Tháng @m.Month</td><td>@m.BookingCount</td><td>@m.CancelledCount</td><td class="right">@m.Deposit.ToString("N0") đ</td><td class="right">@m.ServiceRevenue.ToString("N0") đ</td><td class="right">@m.CancelFee.ToString("N0") đ</td><td class="right"><b>@m.Revenue.ToString("N0") đ</b></td></tr>
+        }
+    </table>
+</div>
+
+@{ var top = ViewBag.TopServices as List<KeyValuePair<string, decimal>> ?? new(); }
+@if (top.Any())
+{
+    <div class="card">
+        <h3>Top dịch vụ mang lại doanh thu</h3>
+        <table class="admin-table">
+            @foreach (var t in top) { <tr><td><b>@t.Key</b></td><td class="right">@t.Value.ToString("N0") đ</td></tr> }
+        </table>
+    </div>
+}

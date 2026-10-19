@@ -1,0 +1,49 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<CustomerDTO>
+@{
+    Layout = "_AdminLayout";
+    var counts = ViewBag.BookingCount as Dictionary<string, int> ?? new();
+}
+<div class="card">
+    <h3>Thêm khách hàng</h3>
+    <form class="mg-form" asp-action="Add" method="post">
+        <div class="field grow"><label>Họ tên</label><input name="FullName" minlength="3" required /></div>
+        <div class="field"><label>Số điện thoại</label><input name="Phone" required /></div>
+        <div class="field"><label>Email</label><input type="email" name="Email" /></div>
+        <div class="field"><label>CCCD</label><input name="IdentityCard" /></div>
+        <div class="field grow"><label>Địa chỉ</label><input name="Address" /></div>
+        <button class="btn btn-gold">+ Thêm</button>
+    </form>
+</div>
+
+<div class="card">
+    <h3>
+        Khách hàng <small>@Model.Count người</small>
+        <form method="get" style="display:flex;gap:8px"><input name="q" value="@ViewBag.Query" placeholder="Tên, SĐT, email, CCCD..." /><button class="btn btn-dark">Tìm</button></form>
+    </h3>
+    <table class="admin-table">
+        <tr><th>Họ tên</th><th>SĐT</th><th>Email</th><th>CCCD</th><th>Địa chỉ</th><th>Số booking</th><th></th></tr>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td><b>@c.FullName</b></td>
+                <td>@c.Phone</td>
+                <td>@c.Email</td>
+                <td>@c.IdentityCard</td>
+                <td class="muted">@c.Address</td>
+                <td>@(counts.TryGetValue(c.Phone ?? "", out var n) ? n : 0)</td>
+                <td>
+                    <div class="actions">
+                        <a class="btn btn-outline" href="/CustomerManage/Detail/@c.Id">Hồ sơ</a>
+                        <form asp-action="Delete" method="post" onsubmit="return confirm('Xóa khách hàng @c.FullName? (Tài khoản đăng nhập của khách cũng bị xóa)');">
+                            <input type="hidden" name="id" value="@c.Id" />
+                            <button class="btn btn-danger">Xóa</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        }
+    </table>
+    @if (!Model.Any()) { <p class="empty">Không có khách hàng</p> }
+</div>

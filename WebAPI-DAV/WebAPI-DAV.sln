@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37216.2
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI-DAV", "WebAPI-DAV.csproj", "{557487E3-1667-4C8D-A4C8-353E391544E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hotel-Web", "..\Hotel-Web\Hotel-Web.csproj", "{BAA79700-590A-47DF-9FE2-D7013576B9A3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{557487E3-1667-4C8D-A4C8-353E391544E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{557487E3-1667-4C8D-A4C8-353E391544E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{557487E3-1667-4C8D-A4C8-353E391544E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{557487E3-1667-4C8D-A4C8-353E391544E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAA79700-590A-47DF-9FE2-D7013576B9A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAA79700-590A-47DF-9FE2-D7013576B9A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAA79700-590A-47DF-9FE2-D7013576B9A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAA79700-590A-47DF-9FE2-D7013576B9A3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {26E4476C-87DA-4539-8323-4F67A35413F8}
+	EndGlobalSection
+EndGlobal

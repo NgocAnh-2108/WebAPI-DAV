@@ -1,0 +1,16 @@
+
+.vs/
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+**/.angular/
+**/appsettings.Development.json
+.env
+.env.*
+!.env.example
+*.bak
+*.mdf
+*.ldf
+*.pfx
+*.p12

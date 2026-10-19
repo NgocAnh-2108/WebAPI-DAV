@@ -1,0 +1,94 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<BookingWithDetailDTO>
+@{
+    Layout = "_AdminLayout";
+    string tab = ViewBag.Tab;
+}
+<style>
+    .rf { display: grid; grid-template-columns: 1.3fr 1fr 200px; gap: 22px; align-items: start; }
+    .rf .qr img { width: 200px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+    .rf .row { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px dashed var(--line); font-size: 14px; }
+    .rf .row span { color: var(--muted); }
+    .no-acc { background: #fcf0dc; color: #8a5a12; padding: 12px 14px; border-radius: 10px; font-size: 13px; }
+    @@media (max-width: 1100px) { .rf { grid-template-columns: 1fr; } }
+</style>
+
+<div class="stat-grid">
+    <div class="stat-box" style="--accent:#fcf0dc"><div class="label">Đang chờ hoàn</div><div class="value">@ViewBag.PendingCount</div><div class="hint">@(((decimal)ViewBag.PendingTotal).ToString("N0")) đ</div></div>
+    <div class="stat-box" style="--accent:#e4f4ea"><div class="label">Đã hoàn cho khách</div><div class="value" style="font-size:28px">@(((decimal)ViewBag.DoneTotal).ToString("N0")) đ</div><div class="hint">Không tính vào doanh thu</div></div>
+</div>
+
+<div class="card">
+    <div class="tabs" style="margin:0 0 6px">
+        <a class="@(tab != "done" ? "on" : "")" href="/FinanceManage/Refunds">Chờ hoàn (@ViewBag.PendingCount)</a>
+        <a class="@(tab == "done" ? "on" : "")" href="/FinanceManage/Refunds?tab=done">Đã hoàn</a>
+    </div>
+    <p class="muted" style="margin:6px 0 0">Quy trình: mở app ngân hàng của khách sạn → quét mã QR (đã có sẵn số tài khoản khách, số tiền, nội dung) → chuyển xong bấm <b>Xác nhận đã hoàn</b>. Khách chưa khai báo tài khoản thì gọi điện hỏi hoặc hoàn tiền mặt khi khách ghé quầy.</p>
+</div>
+
+@foreach (var b in Model)
+{
+    var hasAcc = !string.IsNullOrEmpty(b.RefundAccountNumber) && !string.IsNullOrEmpty(b.RefundBankCode);
+    <div class="card">
+        <h3>Booking <span class="code">@b.BookingCode</span>
+            <span class="pill pill-@b.Status">@RoleHelper.StatusLabel(b.Status)</span>
+            <small>hủy lúc @b.CancelledDate?.ToString("HH:mm dd/MM/yyyy")</small></h3>
+        <div class="rf">
+            <div>
+                <div class="row"><span>Khách hàng</span><b>@b.CustomerName · @b.CustomerPhone</b></div>
+                <div class="row"><span>Phòng / lưu trú</span><b>@string.Join(", ", b.RoomNumbers) · @b.CheckInDate.ToString("dd/MM") → @b.CheckOutDate.ToString("dd/MM")</b></div>
+                <div class="row"><span>Tiền cọc đã nhận</span><b>@b.DepositAmount.ToString("N0") đ</b></div>
+                <div class="row"><span>Khách sạn giữ lại</span><b>@b.CancellationFee.ToString("N0") đ</b></div>
+                <div class="row"><span>Phải hoàn cho khách</span><b style="color:var(--red);font-size:18px">@b.RefundAmount.ToString("N0") đ</b></div>
+                <div class="muted" style="font-size:12px;margin-top:8px">@b.CancelReason</div>
+            </div>
+            <div>
+                @if (hasAcc)
+                {
+                    <div class="row"><span>Ngân hàng</span><b>@BankHelper.Name(b.RefundBankCode)</b></div>
+                    <div class="row"><span>Số tài khoản</span><b class="code">@b.RefundAccountNumber</b></div>
+                    <div class="row"><span>Chủ tài khoản</span><b>@b.RefundAccountName</b></div>
+                    <div class="row"><span>Nội dung</span><b class="code">HOAN COC @b.BookingCode.Replace("-", "")</b></div>
+                }
+                else
+                {
+                    <div class="no-acc">Khách chưa khai báo tài khoản nhận tiền hoàn. Liên hệ khách qua số <b>@b.CustomerPhone</b> hoặc hoàn tiền mặt tại quầy.</div>
+                }
+
+                @if (b.RefundStatus == "Pending")
+                {
+                    <form asp-action="MarkRefunded" method="post" style="margin-top:14px" onsubmit="return confirm('Xác nhận đã hoàn @b.RefundAmount.ToString("N0") đ cho khách @b.CustomerName?');">
+                        <input type="hidden" name="id" value="@b.Id" />
+                        <div class="mg-form">
+                            <div class="field"><label>Hình thức</label>
+                                <select name="method">
+                                    <option value="Bank" selected="@hasAcc">Chuyển khoản</option>
+                                    <option value="Cash" selected="@(!hasAcc)">Tiền mặt tại quầy</option>
+                                </select>
+                            </div>
+                            <div class="field grow"><label>Ghi chú / mã giao dịch</label><input name="note" placeholder="VD: FT2610181234" /></div>
+                        </div>
+                        <button class="btn btn-green" style="margin-top:10px">Xác nhận đã hoàn</button>
+                    </form>
+                }
+                else
+                {
+                    <div class="row" style="margin-top:10px"><span>Đã hoàn lúc</span><b>@b.RefundedDate?.ToString("HH:mm dd/MM/yyyy")</b></div>
+                    <div class="muted">@b.RefundNote</div>
+                }
+            </div>
+            <div class="qr">
+                @if (hasAcc && b.RefundStatus == "Pending")
+                {
+                    <img src="@BankHelper.RefundQr(b.RefundBankCode!, b.RefundAccountNumber!, b.RefundAccountName ?? "", b.RefundAmount, b.BookingCode)" alt="QR hoàn tiền" />
+                    <div class="muted" style="font-size:12px;text-align:center;margin-top:4px">Quét để chuyển hoàn</div>
+                }
+            </div>
+        </div>
+    </div>
+}
+@if (!Model.Any())
+{
+    <div class="card"><p class="empty">@(tab == "done" ? "Chưa có khoản hoàn nào" : "Không có khoản nào cần hoàn cọc")</p></div>
+}

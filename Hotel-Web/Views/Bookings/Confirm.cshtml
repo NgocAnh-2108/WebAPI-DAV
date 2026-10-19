@@ -1,0 +1,134 @@
+﻿@using Hotel_Web.Models.DTO
+@using Hotel_Web.Helpers
+@model List<ServiceDTO>
+@{
+    ViewData["Title"] = "Xác nhận đặt phòng";
+    var room = ViewBag.Room as RoomRawDTO;
+    var type = ViewBag.RoomType as RoomTypeDTO;
+    int nights = ViewBag.Nights;
+    var roomTotal = room!.BasePrice * nights;
+}
+<style>
+    .cf { max-width: 1180px; margin: 130px auto 0; padding: 0 24px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px; align-items: start; }
+    .cf h1 { font-size: 48px; font-weight: 500; margin-top: 8px; }
+    .cf .sub { color: var(--muted); margin-top: 6px; }
+    .svc-block { margin-top: 40px; }
+    .svc-block h2 { font-size: 30px; font-weight: 500; }
+    .svc-block > p { color: var(--muted); font-weight: 300; margin-top: 4px; }
+    .svc-cat { font-family: var(--serif); font-style: italic; color: var(--gold); font-size: 22px; margin: 26px 0 6px; }
+    .svc-item { display: grid; grid-template-columns: 1fr auto auto; gap: 18px; align-items: center; background: #fff; padding: 18px 22px; margin-bottom: 10px; border: 1px solid transparent; transition: .25s; }
+    .svc-item.on { border-color: var(--gold); background: #fdf9f2; }
+    .svc-item .n { font-family: var(--serif); font-size: 22px; font-weight: 600; }
+    .svc-item .d { color: var(--muted); font-size: 13px; font-weight: 300; }
+    .svc-item .p { font-weight: 500; white-space: nowrap; }
+    .svc-item .p small { color: var(--muted); font-weight: 400; }
+    .qty { display: flex; align-items: center; border: 1px solid var(--line); background: #fff; }
+    .qty button { width: 36px; height: 38px; border: none; background: none; font-size: 18px; cursor: pointer; color: var(--ink); }
+    .qty button:hover { background: var(--sand); }
+    .qty input { width: 44px; height: 38px; border: none; text-align: center; font-family: var(--sans); font-size: 15px; -moz-appearance: textfield; }
+    .qty input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .summary { background: #fff; box-shadow: 0 30px 60px rgba(23,19,15,.1); position: sticky; top: 110px; }
+    .summary .top { background: linear-gradient(160deg, #241d17, #3b2f24); color: #efe6d8; padding: 30px; }
+    .summary .top .type { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--champagne); }
+    .summary .top h3 { font-size: 34px; font-weight: 500; color: #fff; margin: 4px 0 14px; }
+    .summary .top .dates { display: flex; justify-content: space-between; font-size: 14px; color: #c9bca9; }
+    .summary .top .dates b { display: block; color: #fff; font-family: var(--serif); font-size: 20px; font-weight: 500; }
+    .summary .body { padding: 26px 30px 30px; }
+    .line { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; }
+    .line span { color: #6f6255; }
+    #svcLines .line { font-size: 13px; padding: 4px 0 4px 12px; }
+    .total { border-top: 1px solid var(--ink); margin-top: 10px; padding-top: 14px; display: flex; justify-content: space-between; align-items: baseline; }
+    .total b { font-family: var(--serif); font-size: 32px; }
+    .dep { background: var(--sand); padding: 14px 16px; margin: 16px 0; font-size: 13px; color: #6f6255; line-height: 1.7; }
+    .dep b { color: var(--ink); }
+    @@media (max-width: 960px) { .cf { grid-template-columns: 1fr; } .summary { position: static; } }
+</style>
+
+<form asp-action="Book" method="post" class="cf">
+    <input type="hidden" name="roomId" value="@room.Id" />
+    <input type="hidden" name="checkIn" value="@ViewBag.CheckIn" />
+    <input type="hidden" name="checkOut" value="@ViewBag.CheckOut" />
+
+    <div class="reveal">
+        <div class="eyebrow">Bước cuối cùng</div>
+        <h1>Hoàn thiện kỳ nghỉ của bạn</h1>
+        <p class="sub">Chọn thêm dịch vụ để chúng tôi chuẩn bị sẵn khi bạn đến. Dịch vụ thanh toán khi trả phòng.</p>
+
+        <div class="svc-block">
+            <h2>Dịch vụ đặt kèm</h2>
+            <p>Không bắt buộc — bạn vẫn có thể yêu cầu thêm tại quầy lễ tân trong thời gian lưu trú.</p>
+            @foreach (var g in Model.GroupBy(s => s.Category))
+            {
+                <div class="svc-cat">@g.Key</div>
+                @foreach (var s in g)
+                {
+                    <div class="svc-item" data-id="@s.Id" data-name="@s.Name" data-unit="@s.Unit" data-price="@((long)s.Price)">
+                        <div><div class="n">@s.Name</div><div class="d">@s.Description</div></div>
+                        <div class="p">@s.Price.ToString("N0")₫ <small>/ @s.Unit</small></div>
+                        <div class="qty">
+                            <button type="button" onclick="step(this,-1)">−</button>
+                            <input type="number" name="services[@s.Id]" value="0" min="0" max="100" oninput="recalc()" />
+                            <button type="button" onclick="step(this,1)">+</button>
+                        </div>
+                    </div>
+                }
+            }
+            @if (!Model.Any()) { <p style="margin-top:20px">Hiện chưa có dịch vụ nào.</p> }
+
+            <div class="fld" style="margin-top:34px">
+                <label>Yêu cầu đặc biệt</label>
+                <textarea name="note" rows="3" placeholder="Giờ đến dự kiến, dị ứng thực phẩm, trang trí kỷ niệm..."></textarea>
+            </div>
+        </div>
+
+        @{ ViewData["PolicyNights"] = nights; }
+        <partial name="_CancellationPolicy" view-data="ViewData" />
+    </div>
+
+    <aside class="summary reveal">
+        <div class="top">
+            <div class="type">@room.RoomTypeName</div>
+            <h3>Phòng @room.RoomNumber</h3>
+            <div class="dates">
+                <div>Nhận phòng từ 14:00<b>@DateTime.Parse((string)ViewBag.CheckIn).ToString("dd/MM/yyyy")</b></div>
+                <div style="text-align:right">Trả phòng trước 12:00<b>@DateTime.Parse((string)ViewBag.CheckOut).ToString("dd/MM/yyyy")</b></div>
+            </div>
+        </div>
+        <div class="body">
+            <div class="line"><span>Tiền phòng (@nights đêm × @room.BasePrice.ToString("N0")₫)</span><b>@roomTotal.ToString("N0")₫</b></div>
+            <div class="line"><span>Dịch vụ đặt kèm</span><b id="svcTotal">0₫</b></div>
+            <div id="svcLines"></div>
+            <div class="total"><span>Tổng dự kiến</span><b id="grand">@roomTotal.ToString("N0")₫</b></div>
+            <div class="dep">
+                Đặt cọc: <b>@((roomTotal * 0.3m).ToString("N0"))₫</b> (30% tiền phòng) — booking chỉ được xác nhận sau khi thanh toán cọc.<br />
+                Dịch vụ và phần còn lại thanh toán khi trả phòng.
+                @if (type != null) { <br /><text>Sức chứa tối đa @type.MaxOccupancy khách.</text> }
+            </div>
+            <button type="submit" class="btn-lux block">Đặt phòng &amp; thanh toán cọc</button>
+            <a class="btn-lux ghost block" style="margin-top:10px" href="/Rooms/Detail/@room.Id">Quay lại</a>
+        </div>
+    </aside>
+</form>
+
+<script>
+    var roomTotal = @((long)roomTotal);
+    function fmt(v) { return Math.round(v).toLocaleString('vi-VN') + '₫'; }
+    function step(btn, d) {
+        var inp = btn.parentNode.querySelector('input');
+        inp.value = Math.max(0, Math.min(100, (parseInt(inp.value) || 0) + d)); recalc();
+    }
+    function recalc() {
+        var sum = 0, html = '';
+        document.querySelectorAll('.svc-item').forEach(function (el) {
+            var q = parseInt(el.querySelector('input').value) || 0;
+            el.classList.toggle('on', q > 0);
+            if (q > 0) {
+                var t = q * parseInt(el.dataset.price); sum += t;
+                html += '<div class="line"><span>' + el.dataset.name + ' × ' + q + ' ' + el.dataset.unit + '</span><span>' + fmt(t) + '</span></div>';
+            }
+        });
+        document.getElementById('svcLines').innerHTML = html;
+        document.getElementById('svcTotal').textContent = fmt(sum);
+        document.getElementById('grand').textContent = fmt(roomTotal + sum);
+    }
+</script>
