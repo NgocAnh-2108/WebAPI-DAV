@@ -14,3 +14,5 @@
 *.ldf
 *.pfx
 *.p12
+*.user
+*.slnLaunch.user
